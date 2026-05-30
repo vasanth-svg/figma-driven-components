@@ -6,13 +6,17 @@ import {
   snackPlatforms,
 } from "./contracts.js";
 
-const stepOrder = ["connect", "change", "progress", "evidence", "build"];
+const stepOrder = ["connect", "setup", "snack", "plan", "progress", "evidence", "build"];
 
 const state = {
-  openAiConnected: false,
-  openAiKeyLabel: "",
   figmaConnected: false,
   gitConnected: false,
+  openAiConnected: false,
+  openAiKeyLabel: "",
+  setupRunning: false,
+  setupComplete: false,
+  snackOpened: false,
+  aiPlan: null,
   selectedRepo: repositories[0],
   activeSnackPlatform: snackPlatforms[0],
   activeStep: "connect",
@@ -23,20 +27,22 @@ const state = {
 const elements = {
   stepNavButtons: document.querySelectorAll("[data-step-target]"),
   stagePanels: document.querySelectorAll("[data-step-panel]"),
-  openAiCard: document.querySelector("#openAiCard"),
   figmaCard: document.querySelector("#figmaCard"),
   gitCard: document.querySelector("#gitCard"),
-  openAiStatus: document.querySelector("#openAiStatus"),
   figmaStatus: document.querySelector("#figmaStatus"),
   gitStatus: document.querySelector("#gitStatus"),
-  openAiKeyInput: document.querySelector("#openAiKeyInput"),
-  openAiError: document.querySelector("#openAiError"),
-  openAiConnectBtn: document.querySelector("#openAiConnectBtn"),
   figmaConnectBtn: document.querySelector("#figmaConnectBtn"),
   gitConnectBtn: document.querySelector("#gitConnectBtn"),
   connectNextBtn: document.querySelector("#connectNextBtn"),
   gateBadge: document.querySelector("#gateBadge"),
   gateMessage: document.querySelector("#gateMessage"),
+  setupBadge: document.querySelector("#setupBadge"),
+  setupResult: document.querySelector("#setupResult"),
+  runSetupBtn: document.querySelector("#runSetupBtn"),
+  openAiStatus: document.querySelector("#openAiStatus"),
+  openAiKeyInput: document.querySelector("#openAiKeyInput"),
+  openAiError: document.querySelector("#openAiError"),
+  openAiConnectBtn: document.querySelector("#openAiConnectBtn"),
   changePanel: document.querySelector("#changePanel"),
   repoSelect: document.querySelector("#repoSelect"),
   repoMeta: document.querySelector("#repoMeta"),
@@ -45,6 +51,7 @@ const elements = {
   prompt: document.querySelector("#prompt"),
   branchName: document.querySelector("#branchName"),
   formError: document.querySelector("#formError"),
+  aiPlanSummary: document.querySelector("#aiPlanSummary"),
   createJobBtn: document.querySelector("#createJobBtn"),
   clearJobBtn: document.querySelector("#clearJobBtn"),
   jobIdBadge: document.querySelector("#jobIdBadge"),
@@ -60,6 +67,8 @@ const elements = {
   snackBranch: document.querySelector("#snackBranch"),
   snackSourceLink: document.querySelector("#snackSourceLink"),
   openSnackLink: document.querySelector("#openSnackLink"),
+  snackNextBtn: document.querySelector("#snackNextBtn"),
+  evidenceBadge: document.querySelector("#evidenceBadge"),
   evidenceList: document.querySelector("#evidenceList"),
   evidenceSummary: document.querySelector("#evidenceSummary"),
   screenshotProof: document.querySelector("#screenshotProof"),
@@ -68,6 +77,8 @@ const elements = {
   videoProof: document.querySelector("#videoProof"),
   videoArtifactMeta: document.querySelector("#videoArtifactMeta"),
   videoArtifactPath: document.querySelector("#videoArtifactPath"),
+  snackChangePreview: document.querySelector("#snackChangePreview"),
+  snackChangeMeta: document.querySelector("#snackChangeMeta"),
   reviewBuildBtn: document.querySelector("#reviewBuildBtn"),
   buildState: document.querySelector("#buildState"),
   releaseSummary: document.querySelector("#releaseSummary"),
@@ -85,9 +96,6 @@ const evidenceIcons = {
 };
 
 function init() {
-  elements.figmaUrls.value = "https://figma.com/design/FgMA1234/Rovia-Mobile?node-id=104-22";
-  elements.prompt.value = "Implement the new RSU insights screen and keep the current mobile app structure.";
-
   renderRepoOptions();
   bindEvents();
   renderAll();
@@ -98,36 +106,42 @@ function bindEvents() {
     button.addEventListener("click", () => setActiveStep(button.dataset.stepTarget));
   });
 
+  elements.figmaConnectBtn.addEventListener("click", () => {
+    state.figmaConnected = true;
+    renderAll();
+  });
+
+  elements.gitConnectBtn.addEventListener("click", () => {
+    state.gitConnected = true;
+    renderAll();
+  });
+
+  elements.connectNextBtn.addEventListener("click", () => setActiveStep("setup"));
+
+  elements.repoSelect.addEventListener("change", () => {
+    state.selectedRepo = repositories.find((repo) => repo.id === elements.repoSelect.value);
+    state.setupComplete = false;
+    state.snackOpened = false;
+    state.aiPlan = null;
+    renderAll();
+  });
+
   elements.openAiKeyInput.addEventListener("input", () => {
     elements.openAiError.textContent = "";
     elements.openAiError.classList.remove("is-note");
   });
 
   elements.openAiConnectBtn.addEventListener("click", connectOpenAi);
+  elements.runSetupBtn.addEventListener("click", runSetup);
 
-  elements.figmaConnectBtn.addEventListener("click", () => {
-    if (!state.openAiConnected) return;
-    state.figmaConnected = true;
-    renderAll();
+  elements.snackNextBtn.addEventListener("click", () => {
+    generateAiPlan();
+    setActiveStep("plan");
   });
 
-  elements.gitConnectBtn.addEventListener("click", () => {
-    if (!state.openAiConnected) return;
-    state.gitConnected = true;
-    renderAll();
-  });
-
-  elements.connectNextBtn.addEventListener("click", () => setActiveStep("change"));
-  elements.reviewBuildBtn.addEventListener("click", () => setActiveStep("build"));
-
-  elements.repoSelect.addEventListener("change", () => {
-    state.selectedRepo = repositories.find((repo) => repo.id === elements.repoSelect.value);
-    renderAll();
-  });
-
-  elements.prompt.addEventListener("input", updateBranchPreview);
   elements.createJobBtn.addEventListener("click", createJob);
   elements.clearJobBtn.addEventListener("click", resetJob);
+  elements.reviewBuildBtn.addEventListener("click", () => setActiveStep("build"));
   elements.approveBuildBtn.addEventListener("click", approveBuild);
 }
 
@@ -145,17 +159,41 @@ function connectOpenAi() {
   state.openAiKeyLabel = maskKey(key);
   elements.openAiKeyInput.value = "";
   elements.openAiKeyInput.placeholder = state.openAiKeyLabel;
-  elements.openAiError.textContent = "Connected for this session. Production should store this server-side in an encrypted vault.";
+  elements.openAiError.textContent = "Connected for this session. Production stores this server-side in an encrypted vault.";
   elements.openAiError.classList.add("is-note");
   renderAll();
+}
+
+function runSetup() {
+  if (!state.openAiConnected || !isRepoReady()) return;
+
+  state.setupRunning = true;
+  state.setupComplete = false;
+  setBadge(elements.setupBadge, "warning", "Running");
+  elements.setupResult.innerHTML = `${icon("loader-circle")} <span>Validating repo, preparing Snack entry, and checking agent instructions.</span>`;
+  renderIcons();
+
+  const timer = window.setTimeout(() => {
+    state.setupRunning = false;
+    state.setupComplete = true;
+    state.snackOpened = true;
+    state.activeStep = "snack";
+    openSnackPreview({ forceReload: true });
+    renderAll();
+  }, 850);
+  state.timers.push(timer);
 }
 
 function isRepoReady() {
   return state.gitConnected && state.selectedRepo.githubAccess && state.selectedRepo.branches.includes("development");
 }
 
-function isReadyForChanges() {
-  return state.openAiConnected && state.figmaConnected && isRepoReady();
+function isConnectReady() {
+  return state.figmaConnected && state.gitConnected;
+}
+
+function isSetupReady() {
+  return isConnectReady() && state.openAiConnected && isRepoReady();
 }
 
 function isEvidenceReady() {
@@ -168,7 +206,9 @@ function isBuildStepReady() {
 
 function canOpenStep(step) {
   if (step === "connect") return true;
-  if (step === "change") return isReadyForChanges();
+  if (step === "setup") return isConnectReady();
+  if (step === "snack") return state.setupComplete;
+  if (step === "plan") return state.snackOpened;
   if (step === "progress") return Boolean(state.job);
   if (step === "evidence") return isEvidenceReady();
   if (step === "build") return isBuildStepReady();
@@ -177,16 +217,19 @@ function canOpenStep(step) {
 
 function setActiveStep(step) {
   if (!stepOrder.includes(step) || !canOpenStep(step)) return;
+  if (step === "plan") generateAiPlan();
   state.activeStep = step;
-  renderStepShell();
-  renderIcons();
+  renderAll();
 }
 
 function bestAvailableStep() {
   if (state.activeStep === "build" && canOpenStep("build")) return "build";
   if (state.activeStep === "evidence" && canOpenStep("evidence")) return "evidence";
   if (state.job && !isEvidenceReady()) return "progress";
-  if (isReadyForChanges() && !state.job) return "change";
+  if (state.aiPlan && canOpenStep("plan")) return "plan";
+  if (state.snackOpened) return "snack";
+  if (state.setupComplete) return "snack";
+  if (isConnectReady()) return "setup";
   return "connect";
 }
 
@@ -208,8 +251,10 @@ function renderStepShell() {
 }
 
 function isStepComplete(step) {
-  if (step === "connect") return isReadyForChanges();
-  if (step === "change") return Boolean(state.job);
+  if (step === "connect") return isConnectReady();
+  if (step === "setup") return state.setupComplete;
+  if (step === "snack") return Boolean(state.aiPlan || state.job);
+  if (step === "plan") return Boolean(state.job);
   if (step === "progress") return isEvidenceReady();
   if (step === "evidence") return state.job?.status === "building" || state.job?.status === "complete";
   if (step === "build") return state.job?.status === "complete";
@@ -217,17 +262,13 @@ function isStepComplete(step) {
 }
 
 function renderConnections() {
-  renderOpenAiConnection();
-
   updateConnectorCard({
     card: elements.figmaCard,
     status: elements.figmaStatus,
     button: elements.figmaConnectBtn,
     connected: state.figmaConnected,
-    canConnect: state.openAiConnected,
     connectedText: "Connected",
     idleText: "Connect Figma MCP",
-    blockedText: "Connect OpenAI first",
     idleIcon: "plug-zap",
     buttonText: "Figma MCP connected",
     buttonIcon: "circle-check",
@@ -238,77 +279,65 @@ function renderConnections() {
     status: elements.gitStatus,
     button: elements.gitConnectBtn,
     connected: state.gitConnected,
-    canConnect: state.openAiConnected,
-    connectedText: isRepoReady() ? "Repo ready" : "Connected",
+    connectedText: state.gitConnected ? "Connected" : "Not connected",
     idleText: "Connect Git repository",
-    blockedText: "Connect OpenAI first",
     idleIcon: "git-pull-request-create",
     buttonText: "Git repo connected",
     buttonIcon: "circle-check",
   });
 
-  const ready = isReadyForChanges();
-  setBadge(elements.gateBadge, ready ? "success" : "secondary", ready ? "Ready" : "Locked");
-  elements.changePanel.classList.toggle("is-disabled", !ready);
-
-  elements.repoSelect.disabled = !state.gitConnected;
-  elements.figmaUrls.disabled = !ready;
-  elements.prompt.disabled = !ready;
-  elements.createJobBtn.disabled = !ready;
+  const ready = isConnectReady();
+  setBadge(elements.gateBadge, ready ? "success" : "secondary", ready ? "Connected" : "Locked");
   elements.connectNextBtn.disabled = !ready;
+  elements.changePanel.classList.toggle("is-disabled", !state.aiPlan);
 
-  if (!state.openAiConnected) {
-    setGateMessage("lock-keyhole", "Add the OpenAI API key to enable the agent runtime and tool orchestration.");
-  } else if (!state.figmaConnected && !state.gitConnected) {
-    setGateMessage("lock-keyhole", "OpenAI is connected. Connect Figma MCP and GitHub/Git MCP next.");
+  if (!state.figmaConnected && !state.gitConnected) {
+    setGateMessage("lock-keyhole", "Connect Figma MCP and GitHub/Git MCP to continue.");
   } else if (!state.figmaConnected) {
-    setGateMessage("lock-keyhole", "Git repo is connected. Connect Figma MCP before starting a change.");
+    setGateMessage("lock-keyhole", "Git repo is connected. Connect Figma MCP next.");
   } else if (!state.gitConnected) {
-    setGateMessage("lock-keyhole", "Figma MCP is connected. Connect a Git repository before starting a change.");
-  } else if (!state.selectedRepo.branches.includes("development")) {
-    setGateMessage("circle-alert", "This repo is connected, but it is blocked because the development branch is missing.");
+    setGateMessage("lock-keyhole", "Figma MCP is connected. Connect GitHub/Git MCP next.");
   } else {
-    setGateMessage("badge-check", "Everything is connected. Continue to the change request screen.");
+    setGateMessage("badge-check", "Tools connected. Continue to select the repo and run setup.");
   }
 }
 
-function renderOpenAiConnection() {
-  elements.openAiCard.classList.toggle("connected", state.openAiConnected);
+function updateConnectorCard({ card, status, button, connected, connectedText, idleText, idleIcon, buttonText, buttonIcon }) {
+  card.classList.toggle("connected", connected);
+  setBadge(status, connected ? "success" : "secondary", connected ? connectedText : "Not connected", connected ? "circle-check" : "circle-alert");
+  setButtonLabel(button, connected ? buttonIcon : idleIcon, connected ? buttonText : idleText);
+  button.disabled = connected;
+}
+
+function renderSetup() {
+  const setupReady = isSetupReady();
+
+  elements.repoSelect.disabled = !state.gitConnected || state.setupRunning;
+  elements.runSetupBtn.disabled = !setupReady || state.setupRunning || state.setupComplete;
+  elements.openAiKeyInput.disabled = state.openAiConnected || state.setupRunning;
+  elements.openAiConnectBtn.disabled = state.openAiConnected || state.setupRunning;
+
   setBadge(
     elements.openAiStatus,
     state.openAiConnected ? "success" : "secondary",
     state.openAiConnected ? "Agent ready" : "Not connected",
     state.openAiConnected ? "circle-check" : "circle-alert",
   );
-  elements.openAiKeyInput.disabled = state.openAiConnected;
-  elements.openAiConnectBtn.disabled = state.openAiConnected;
   setButtonLabel(
     elements.openAiConnectBtn,
     state.openAiConnected ? "circle-check" : "shield-check",
     state.openAiConnected ? `${state.openAiKeyLabel} connected` : "Connect OpenAI agent",
   );
-}
 
-function updateConnectorCard({
-  card,
-  status,
-  button,
-  connected,
-  canConnect,
-  connectedText,
-  idleText,
-  blockedText,
-  idleIcon,
-  buttonText,
-  buttonIcon,
-}) {
-  card.classList.toggle("connected", connected);
-  const waitingForAgent = !connected && !canConnect;
-  const statusLabel = connected ? connectedText : waitingForAgent ? "Waiting for OpenAI" : "Not connected";
-  const statusIcon = connected ? "circle-check" : waitingForAgent ? "clock" : "circle-alert";
-  setBadge(status, connected ? "success" : "secondary", statusLabel, statusIcon);
-  setButtonLabel(button, connected ? buttonIcon : idleIcon, connected ? buttonText : waitingForAgent ? blockedText : idleText);
-  button.disabled = connected || waitingForAgent;
+  if (state.setupRunning) {
+    setBadge(elements.setupBadge, "warning", "Running");
+  } else if (state.setupComplete) {
+    setBadge(elements.setupBadge, "success", "Ready");
+    elements.setupResult.innerHTML = `${icon("badge-check")} <span>Setup complete. The app is open in Expo Snack from the selected repo branch.</span>`;
+  } else {
+    setBadge(elements.setupBadge, setupReady ? "primary" : "secondary", setupReady ? "Ready" : "Waiting");
+    elements.setupResult.innerHTML = `${icon("settings-2")} <span>Setup will validate the repo, confirm the development branch, prepare Snack, and connect the AI runtime.</span>`;
+  }
 }
 
 function renderRepoOptions() {
@@ -326,11 +355,6 @@ function renderRepoChecks() {
 
   const checks = [
     {
-      label: "OpenAI agent runtime",
-      ok: state.openAiConnected,
-      detail: state.openAiConnected ? "Ready to plan changes and coordinate tools" : "Waiting for API key",
-    },
-    {
       label: "GitHub/Git MCP repository access",
       ok: state.gitConnected && repo.githubAccess,
       detail: state.gitConnected && repo.githubAccess ? "Connected to selected repository" : "Waiting for Git connection",
@@ -347,6 +371,16 @@ function renderRepoChecks() {
       label: "Figma MCP design access",
       ok: state.figmaConnected,
       detail: state.figmaConnected ? "Ready to fetch design context and screenshots" : "Waiting for Figma MCP",
+    },
+    {
+      label: "OpenAI agent runtime",
+      ok: state.openAiConnected,
+      detail: state.openAiConnected ? "Ready to auto-create prompt and branch plan" : "Waiting for API key",
+    },
+    {
+      label: "Snack preview entry",
+      ok: state.setupComplete,
+      detail: state.setupComplete ? "Prepared from repo source URL" : "Prepared during setup",
     },
   ];
 
@@ -399,8 +433,8 @@ function renderTimeline() {
     .join("");
 
   elements.progressNextHint.textContent = isEvidenceReady()
-    ? "Evidence is ready. Review the changed screen and recording before approving a build."
-    : "Screenshot and video evidence will appear automatically when Maestro finishes.";
+    ? "Changed screenshot is ready in Snack. Review it before approving a build."
+    : "After code changes finish, the worker captures a changed screenshot and refreshes the Snack preview.";
 }
 
 function renderSnackPlatformTabs() {
@@ -423,16 +457,41 @@ function renderSnackPlatformTabs() {
     button.addEventListener("click", () => {
       state.activeSnackPlatform = snackPlatforms.find((platform) => platform.id === button.dataset.platformId);
       renderSnackPlatformTabs();
-      updateSnackPreview({ forceReload: true });
+      openSnackPreview({ forceReload: true });
       renderIcons();
     });
   });
 }
 
+function generateAiPlan() {
+  if (state.aiPlan) return;
+
+  const figmaUrl = "https://figma.com/design/FgMA1234/Rovia-Mobile?node-id=104-22";
+  const prompt = "Implement the RSU insights screen from the selected Figma frame, keep the current mobile folder structure, and reuse existing app components before adding new ones.";
+
+  state.aiPlan = {
+    figmaUrls: [figmaUrl],
+    prompt,
+    branchName: buildBranchName("job-preview", prompt),
+    baseBranch: "development",
+  };
+}
+
+function renderAiPlan() {
+  if (!state.aiPlan && state.snackOpened) generateAiPlan();
+
+  const hasPlan = Boolean(state.aiPlan);
+  elements.figmaUrls.value = hasPlan ? state.aiPlan.figmaUrls.join("\n") : "";
+  elements.prompt.value = hasPlan ? state.aiPlan.prompt : "";
+  elements.branchName.textContent = hasPlan ? state.aiPlan.branchName : "figma/job-preview-design-update";
+  elements.createJobBtn.disabled = !hasPlan || Boolean(state.job);
+  elements.aiPlanSummary.classList.toggle("is-ready", hasPlan);
+}
+
 function renderEvidence() {
   const evidence = state.job?.evidence ?? [
-    { label: "Validation", value: "Waiting for a connected change request", status: "Waiting" },
-    { label: "Changed screen screenshot", value: "Captured after implementation", status: "Waiting" },
+    { label: "Validation", value: "Waiting for AI code changes", status: "Waiting" },
+    { label: "Snack screenshot", value: "Captured after implementation", status: "Waiting" },
     { label: "Video recording", value: "Full mobile flow evidence", status: "Waiting" },
   ];
 
@@ -458,14 +517,15 @@ function renderEvidence() {
 
 function renderEvidenceArtifacts() {
   const artifacts = state.job?.evidenceArtifacts;
+  setBadge(elements.evidenceBadge, artifacts ? "success" : "secondary", artifacts ? "Evidence ready" : "Waiting");
 
   if (!artifacts) {
     elements.screenshotProof.className = "screenshot-proof is-waiting";
     elements.screenshotProof.innerHTML = `
       <div class="mock-phone-screen">
         <span class="mock-status"></span>
-        <strong>Waiting for Maestro screenshot</strong>
-        <p>Screen capture appears here after the code changes and flow test finish.</p>
+        <strong>Waiting for changed screen</strong>
+        <p>After AI finishes, this screenshot is attached and shown beside Snack.</p>
       </div>
     `;
     elements.videoProof.className = "video-proof is-waiting";
@@ -478,14 +538,40 @@ function renderEvidenceArtifacts() {
     elements.videoArtifactMeta.textContent = "No recording captured yet.";
     elements.screenshotArtifactPath.textContent = "artifacts/pending/screen.png";
     elements.videoArtifactPath.textContent = "artifacts/pending/flow.mp4";
-    elements.evidenceSummary.textContent = "Build approval stays locked until validation, screenshot capture, and video recording pass.";
+    elements.evidenceSummary.textContent = "Build approval stays locked until validation, Snack refresh, screenshot capture, and video recording pass.";
+    elements.snackChangeMeta.textContent = "Waiting for AI changes to finish.";
     elements.reviewBuildBtn.disabled = true;
     return;
   }
 
   elements.screenshotProof.className = "screenshot-proof is-ready";
-  elements.screenshotProof.innerHTML = `
-    <div class="mock-phone-screen">
+  elements.screenshotProof.innerHTML = changedScreenMarkup();
+  elements.videoProof.className = "video-proof is-ready";
+  elements.videoProof.innerHTML = `
+    ${icon("play-circle")}
+    <strong>${artifacts.videoName}</strong>
+    <p>${artifacts.duration} recording of the full Maestro flow.</p>
+    <div class="video-timeline"><span style="width: 78%"></span></div>
+  `;
+  elements.screenshotArtifactMeta.textContent = `${artifacts.screenName} captured from ${state.job.commitSha}.`;
+  elements.videoArtifactMeta.textContent = `MP4 recording stored with job ${state.job.id}.`;
+  elements.screenshotArtifactPath.textContent = artifacts.screenPath;
+  elements.videoArtifactPath.textContent = artifacts.videoPath;
+  elements.snackChangePreview.innerHTML = changedScreenMarkup("compact");
+  elements.snackChangeMeta.textContent = `Snack refreshed from ${state.job.branchName} at ${state.job.commitSha}.`;
+
+  if (isBuildStepReady()) {
+    elements.evidenceSummary.textContent = "Changed screenshot is visible in Snack. Continue to approval when this looks right.";
+    elements.reviewBuildBtn.disabled = false;
+  } else {
+    elements.evidenceSummary.textContent = "Screenshot is captured. Waiting for PR creation and final validation summary.";
+    elements.reviewBuildBtn.disabled = true;
+  }
+}
+
+function changedScreenMarkup(extraClass = "") {
+  return `
+    <div class="mock-phone-screen ${extraClass}">
       <span class="mock-status ready"></span>
       <div class="mock-app-bar">
         <span></span>
@@ -501,42 +587,18 @@ function renderEvidenceArtifacts() {
       <div class="mock-list-row short"></div>
     </div>
   `;
-  elements.videoProof.className = "video-proof is-ready";
-  elements.videoProof.innerHTML = `
-    ${icon("play-circle")}
-    <strong>${artifacts.videoName}</strong>
-    <p>${artifacts.duration} recording of the full Maestro flow.</p>
-    <div class="video-timeline"><span style="width: 78%"></span></div>
-  `;
-  elements.screenshotArtifactMeta.textContent = `${artifacts.screenName} captured from ${state.job.commitSha}.`;
-  elements.videoArtifactMeta.textContent = `MP4 recording stored with job ${state.job.id}.`;
-  elements.screenshotArtifactPath.textContent = artifacts.screenPath;
-  elements.videoArtifactPath.textContent = artifacts.videoPath;
-
-  if (isBuildStepReady()) {
-    elements.evidenceSummary.textContent = "Evidence is ready. Review it here, then continue to approval when you are comfortable.";
-    elements.reviewBuildBtn.disabled = false;
-  } else {
-    elements.evidenceSummary.textContent = "Evidence is captured. Waiting for PR creation and final validation summary.";
-    elements.reviewBuildBtn.disabled = true;
-  }
-}
-
-function updateBranchPreview() {
-  const previewJobId = state.job?.id ?? "job-preview";
-  elements.branchName.textContent = buildBranchName(previewJobId, elements.prompt.value);
 }
 
 function createJob() {
   clearTimers();
   elements.formError.textContent = "";
 
-  if (!isReadyForChanges()) {
-    elements.formError.textContent = "Connect OpenAI, Figma MCP, and GitHub/Git MCP before starting changes.";
+  if (!state.aiPlan) {
+    elements.formError.textContent = "Let AI generate the Figma URL, prompt, and branch plan first.";
     return;
   }
 
-  const parsed = parseFigmaUrls(elements.figmaUrls.value);
+  const parsed = parseFigmaUrls(state.aiPlan.figmaUrls.join("\n"));
   if (!parsed.ok) {
     elements.formError.textContent = parsed.error;
     return;
@@ -547,8 +609,8 @@ function createJob() {
     id,
     repository: state.selectedRepo,
     figmaInputs: parsed.urls,
-    prompt: elements.prompt.value.trim(),
-    branchName: buildBranchName(id, elements.prompt.value),
+    prompt: state.aiPlan.prompt,
+    branchName: buildBranchName(id, state.aiPlan.prompt),
     status: "queued",
     events: [],
     rawLogs: [],
@@ -559,10 +621,11 @@ function createJob() {
     approved: false,
   };
 
+  state.aiPlan.branchName = state.job.branchName;
   state.activeStep = "progress";
   setBadge(elements.jobIdBadge, "primary", id);
   elements.branchName.textContent = state.job.branchName;
-  addEvent("Change request created", `Branch ${state.job.branchName} will open a PR to development.`);
+  addEvent("AI change plan accepted", `Branch ${state.job.branchName} will open a PR to development.`);
   addRawLog(`queued ${id} ${state.job.branchName}`);
   runJobSimulation();
   renderAll();
@@ -572,11 +635,11 @@ function runJobSimulation() {
   const sequence = [
     ["validating_repo", "Repository verified", "GitHub/Git MCP confirmed access and development branch."],
     ["fetching_figma", "Figma design fetched", "Figma MCP prepared design context, screenshot, and metadata fallback."],
-    ["implementing", "Code changes applied", "The OpenAI agent updated the repo branch and refreshed the Snack entry."],
+    ["implementing", "Code changes applied", "AI updated the repo branch and refreshed the Snack entry."],
     ["validating_code", "Code checks passed", "Lint, typecheck, and local build checks completed."],
     ["creating_pr", "Draft PR prepared", `Target branch is development from ${state.job.branchName}.`],
-    ["testing_flow", "Evidence captured", "The changed screen screenshot and MP4 recording are attached to the job."],
-    ["awaiting_review", "Ready for review", "APK build remains blocked until you approve stage or prod."],
+    ["testing_flow", "Snack screenshot captured", "Changed screen screenshot and MP4 recording are attached to the job."],
+    ["awaiting_review", "Ready for review", "Snack shows the changed UI. APK build remains blocked until approval."],
   ];
 
   sequence.forEach(([status, title, body], index) => {
@@ -587,12 +650,12 @@ function runJobSimulation() {
         state.activeStep = "evidence";
         state.job.evidence = [
           { label: "Validation", value: "lint, typecheck, and PR checks passed", status: "Passed" },
-          { label: "Changed screen screenshot", value: "02-rsu-insights-screen.png", status: "Passed" },
+          { label: "Snack screenshot", value: "02-rsu-insights-snack.png", status: "Passed" },
           { label: "Video recording", value: "flow-recording.mp4", status: "Passed" },
         ];
         state.job.evidenceArtifacts = {
-          screenName: "RSU Insights screen",
-          screenPath: `artifacts/${state.job.id}/screenshots/02-rsu-insights-screen.png`,
+          screenName: "RSU Insights Snack preview",
+          screenPath: `artifacts/${state.job.id}/screenshots/02-rsu-insights-snack.png`,
           videoName: "flow-recording.mp4",
           videoPath: `artifacts/${state.job.id}/recordings/flow-recording.mp4`,
           duration: "00:38",
@@ -638,11 +701,11 @@ function approveBuild() {
 function resetJob() {
   clearTimers();
   state.job = null;
-  state.activeStep = isReadyForChanges() ? "change" : "connect";
+  state.aiPlan = null;
+  state.activeStep = state.snackOpened ? "snack" : state.setupComplete ? "snack" : isConnectReady() ? "setup" : "connect";
   elements.formError.textContent = "";
   setBadge(elements.jobIdBadge, "secondary", "No job yet");
   elements.buildResult.textContent = "Build approval unlocks after validation and Maestro evidence pass.";
-  updateBranchPreview();
   renderAll();
 }
 
@@ -665,9 +728,11 @@ function addRawLog(line) {
 
 function renderAll() {
   renderConnections();
+  renderSetup();
   renderRepoChecks();
   renderTimeline();
   renderSnackPlatformTabs();
+  renderAiPlan();
   renderEvents();
   renderEvidence();
   updateSnackPreview();
@@ -679,7 +744,7 @@ function renderAll() {
 
 function renderEvents() {
   if (!state.job) {
-    elements.events.innerHTML = `<p class="empty-state">Connect tools and start a change to see agent progress.</p>`;
+    elements.events.innerHTML = `<p class="empty-state">Start AI code changes to see progress.</p>`;
     elements.rawLog.textContent = "No worker logs yet.";
     return;
   }
@@ -702,22 +767,27 @@ function renderEvents() {
 }
 
 function updateSnackPreview({ forceReload = false } = {}) {
-  const ready = isReadyForChanges();
+  openSnackPreview({ forceReload });
+}
+
+function openSnackPreview({ forceReload = false } = {}) {
   const branch = getSnackBranch();
   const sourceUrl = buildSnackSourceUrl(branch);
   const snackUrl = buildSnackUrl(sourceUrl, true);
   const editorUrl = buildSnackUrl(sourceUrl, false);
+  const ready = state.snackOpened;
 
   elements.snackRepoName.textContent = state.selectedRepo.fullName;
   elements.snackBranch.textContent = branch;
   elements.snackSourceLink.href = sourceUrl;
   elements.snackSourceLink.textContent = state.selectedRepo.snack.entryFile;
   elements.openSnackLink.href = editorUrl;
+  elements.snackNextBtn.disabled = !ready;
   elements.snackLoading.classList.toggle("is-hidden", ready);
   elements.snackFrame.classList.toggle("is-visible", ready);
 
   if (!ready) {
-    setBadge(elements.previewState, "secondary", state.openAiConnected ? "Blocked" : "Waiting");
+    setBadge(elements.previewState, "secondary", "Waiting");
     if (elements.snackFrame.src !== "about:blank") {
       elements.snackFrame.src = "about:blank";
       elements.snackFrame.dataset.snackUrl = "";
@@ -725,7 +795,7 @@ function updateSnackPreview({ forceReload = false } = {}) {
     return;
   }
 
-  const label = isEvidenceReady() ? "Evidence ready" : state.job ? "Auto-running" : "Repo live";
+  const label = isEvidenceReady() ? "Changed UI ready" : "App running";
   setBadge(elements.previewState, isEvidenceReady() ? "success" : "primary", label);
   if (forceReload || elements.snackFrame.dataset.snackUrl !== snackUrl) {
     elements.snackFrame.src = snackUrl;
@@ -747,7 +817,7 @@ function updateApproval() {
   if (state.job.status === "awaiting_review") {
     setBadge(elements.buildState, "success", "Ready");
     elements.releaseSummary.textContent = `Ready to build from ${state.job.branchName} at commit ${state.job.commitSha}.`;
-    elements.buildResult.textContent = "Evidence passed. Choose stage or prod, then approve APK generation.";
+    elements.buildResult.textContent = "Changed screenshot and recording passed. Choose stage or prod, then approve APK generation.";
   } else if (state.job.status === "building") {
     setBadge(elements.buildState, "warning", "Building");
     elements.releaseSummary.textContent = "APK generation is running. The final screen and recording will appear here when complete.";
@@ -758,7 +828,7 @@ function updateApproval() {
     elements.buildResult.innerHTML = `<strong>APK ready:</strong> <code>${state.job.apkUrl}</code>`;
   } else {
     setBadge(elements.buildState, "secondary", "Blocked");
-    elements.releaseSummary.textContent = "Review the screenshot and video recording before approving build generation.";
+    elements.releaseSummary.textContent = "Review the Snack screenshot and video recording before approving build generation.";
     elements.buildResult.textContent = "Waiting for validation and Maestro evidence.";
   }
 }

@@ -2,7 +2,7 @@
 
 ## Delivery Order
 
-- [ ] Plan 1 first: OpenAI runtime connection, Figma input, repo selection, branch/PR to `development`, Maestro evidence, approval, and APK build.
+- [ ] Plan 1 first: Figma/Git connection, repo setup, Snack preview, AI-created Figma/prompt/branch plan, branch/PR to `development`, Maestro evidence, approval, and APK build.
 - [ ] Plan 2 second: terminal-free website control room, one-screen-at-a-time workflow, and Expo Snack live previews.
 
 ## Phase 1: Repository And Docs
@@ -17,15 +17,17 @@
 - [ ] Use Bootstrap component styles for standard controls such as buttons, selects, textareas, badges, segmented controls, and radio choices.
 - [ ] Use progressive disclosure: show only the current workflow screen and keep future screens locked until available.
 - [ ] Build authentication shell.
-- [ ] Build OpenAI API key connection screen; backend stores the key in encrypted server-side secret storage and never logs it.
+- [ ] Build first screen with only Figma MCP and GitHub/Git MCP connection.
 - [ ] Build repo selector.
+- [ ] Build repo setup screen with OpenAI API key connection; backend stores the key in encrypted server-side secret storage and never logs it.
 - [ ] Verify `development` exists before allowing job creation.
-- [ ] Build Figma URL input with multiple URL support.
+- [ ] Open the app in Expo Snack after setup completes.
+- [ ] Build AI-created plan screen that shows generated Figma URLs, prompt, branch name, and PR target.
 - [ ] Build job progress timeline.
 - [ ] Build a terminal-free job activity view with readable events and advanced raw logs.
-- [ ] Build live UI preview panel for changed screens while implementation is running.
+- [ ] Build live UI preview panel for the selected repo before AI changes start.
 - [ ] Build Expo Snack platform tabs for Android, iOS, web, and device QR when supported.
-- [ ] Build evidence review screen with the changed UI screenshot and MP4 video recording visible before approval.
+- [ ] Build evidence review screen with the changed Snack screenshot and MP4 video recording visible before approval.
 - [ ] Build approval UI for `stage` and `prod`.
 - [ ] Build final APK result screen with APK artifact, build result screen, and build recording visible after generation.
 

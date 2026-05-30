@@ -16,11 +16,11 @@
           </div>
           <div>
             <p class="eyebrow">Feature One</p>
-            <h1>Run a Figma-to-APK agent workspace</h1>
+            <h1>Ship Figma changes step by step</h1>
           </div>
         </div>
         <p class="hero-copy">
-          Add the OpenAI API key, connect Figma MCP and GitHub/Git MCP, then move through one focused screen at a time: change request, agent work, screenshot/video evidence, and approval-gated APK generation.
+          Connect Figma and Git first, select the repo, run setup, open the app in Expo Snack, let AI generate the Figma prompt and branch plan, then review changed screenshots before APK approval.
         </p>
       </header>
 
@@ -30,32 +30,46 @@
             <span class="step-number">1</span>
             <span>
               <strong>Connect</strong>
-              <small>OpenAI, Figma, Git</small>
+              <small>Figma and Git</small>
             </span>
           </button>
-          <button class="btn step-nav" type="button" data-step-target="change" disabled>
+          <button class="btn step-nav" type="button" data-step-target="setup" disabled>
             <span class="step-number">2</span>
             <span>
-              <strong>Request</strong>
-              <small>Repo and Figma URLs</small>
+              <strong>Setup</strong>
+              <small>Repo and agent</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="snack" disabled>
+            <span class="step-number">3</span>
+            <span>
+              <strong>Snack</strong>
+              <small>Open live app</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="plan" disabled>
+            <span class="step-number">4</span>
+            <span>
+              <strong>AI plan</strong>
+              <small>URL, prompt, branch</small>
             </span>
           </button>
           <button class="btn step-nav" type="button" data-step-target="progress" disabled>
-            <span class="step-number">3</span>
+            <span class="step-number">5</span>
             <span>
               <strong>Work</strong>
-              <small>Readable agent status</small>
+              <small>Readable status</small>
             </span>
           </button>
           <button class="btn step-nav" type="button" data-step-target="evidence" disabled>
-            <span class="step-number">4</span>
+            <span class="step-number">6</span>
             <span>
               <strong>Evidence</strong>
-              <small>Screen and video</small>
+              <small>Snack screenshot</small>
             </span>
           </button>
           <button class="btn step-nav" type="button" data-step-target="build" disabled>
-            <span class="step-number">5</span>
+            <span class="step-number">7</span>
             <span>
               <strong>Build</strong>
               <small>Approve APK</small>
@@ -68,41 +82,12 @@
             <div class="section-title">
               <div>
                 <p class="eyebrow">Step 1</p>
-                <h2 id="connect-title">Connect the agent runtime and tools</h2>
+                <h2 id="connect-title">Connect Figma MCP and GitHub/Git MCP</h2>
               </div>
               <span id="gateBadge" class="badge rounded-pill text-bg-secondary">Locked</span>
             </div>
 
-            <div class="connector-grid three-up">
-              <article id="openAiCard" class="connector-card" aria-labelledby="openai-title">
-                <div class="connector-top">
-                  <div class="connector-icon openai-icon" aria-hidden="true">
-                    <i data-lucide="brain-circuit"></i>
-                  </div>
-                  <span id="openAiStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
-                </div>
-                <h3 id="openai-title">OpenAI API key</h3>
-                <p>Required for the agent that plans code changes, coordinates MCP tools, and explains progress.</p>
-                <label class="form-label" for="openAiKeyInput">API key</label>
-                <div class="input-group">
-                  <span class="input-group-text" aria-hidden="true">
-                    <i data-lucide="key-round"></i>
-                  </span>
-                  <input
-                    id="openAiKeyInput"
-                    class="form-control"
-                    type="password"
-                    autocomplete="off"
-                    placeholder="sk-proj-..."
-                  />
-                </div>
-                <p id="openAiError" class="connector-error" role="alert"></p>
-                <button id="openAiConnectBtn" class="btn secondary-action" type="button">
-                  <i data-lucide="shield-check" aria-hidden="true"></i>
-                  <span>Connect OpenAI agent</span>
-                </button>
-              </article>
-
+            <div class="connector-grid">
               <article id="figmaCard" class="connector-card" aria-labelledby="figma-title">
                 <div class="connector-top">
                   <div class="connector-icon figma-icon" aria-hidden="true">
@@ -111,8 +96,8 @@
                   <span id="figmaStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
                 </div>
                 <h3 id="figma-title">Figma MCP</h3>
-                <p>Required for design context, node screenshots, metadata fallback, and asset references.</p>
-                <button id="figmaConnectBtn" class="btn secondary-action" type="button" disabled>
+                <p>Fetches design context, node screenshots, metadata fallback, and asset references.</p>
+                <button id="figmaConnectBtn" class="btn secondary-action" type="button">
                   <i data-lucide="plug-zap" aria-hidden="true"></i>
                   <span>Connect Figma MCP</span>
                 </button>
@@ -126,8 +111,8 @@
                   <span id="gitStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
                 </div>
                 <h3 id="git-title">GitHub / Git MCP</h3>
-                <p>Required for repo access, branch validation, PR creation, and status comments.</p>
-                <button id="gitConnectBtn" class="btn secondary-action" type="button" disabled>
+                <p>Lists repositories, validates `development`, creates branches, and opens PRs.</p>
+                <button id="gitConnectBtn" class="btn secondary-action" type="button">
                   <i data-lucide="git-pull-request-create" aria-hidden="true"></i>
                   <span>Connect Git repository</span>
                 </button>
@@ -136,73 +121,177 @@
 
             <div id="gateMessage" class="gate-message" role="status">
               <i data-lucide="lock-keyhole" aria-hidden="true"></i>
-              Add the OpenAI API key first, then connect Figma MCP and GitHub/Git MCP.
+              Connect Figma MCP and GitHub/Git MCP to continue.
             </div>
 
             <button id="connectNextBtn" class="btn primary-action stage-primary" type="button" disabled>
               <i data-lucide="arrow-right" aria-hidden="true"></i>
-              <span>Continue to change request</span>
+              <span>Continue to repo setup</span>
             </button>
           </section>
 
-          <section id="changePanel" class="panel stage-panel change-panel is-disabled" data-step-panel="change" aria-labelledby="change-title">
+          <section class="panel stage-panel" data-step-panel="setup" aria-labelledby="setup-title">
             <div class="section-title">
               <div>
                 <p class="eyebrow">Step 2</p>
-                <h2 id="change-title">Tell the agent what to build</h2>
+                <h2 id="setup-title">Select repo and run setup</h2>
               </div>
-              <span id="jobIdBadge" class="badge rounded-pill text-bg-secondary">No job yet</span>
+              <span id="setupBadge" class="badge rounded-pill text-bg-secondary">Waiting</span>
             </div>
 
             <div class="field-row">
               <label class="form-label" for="repoSelect">Repository</label>
               <select id="repoSelect" class="form-select" disabled></select>
-              <p id="repoMeta" class="hint">Connect GitHub/Git MCP to choose a repository.</p>
+              <p id="repoMeta" class="hint">Connect GitHub/Git MCP to choose and validate a repository.</p>
             </div>
 
-            <div id="repoChecks" class="repo-checks" aria-live="polite"></div>
+            <div class="setup-grid">
+              <article class="setup-card">
+                <div class="connector-top">
+                  <div class="connector-icon openai-icon" aria-hidden="true">
+                    <i data-lucide="brain-circuit"></i>
+                  </div>
+                  <span id="openAiStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
+                </div>
+                <h3>AI runtime</h3>
+                <p>Used after repo setup so AI can create the branch plan and code changes automatically.</p>
+                <label class="form-label" for="openAiKeyInput">OpenAI API key</label>
+                <div class="input-group">
+                  <span class="input-group-text" aria-hidden="true">
+                    <i data-lucide="key-round"></i>
+                  </span>
+                  <input id="openAiKeyInput" class="form-control" type="password" autocomplete="off" placeholder="sk-proj-..." />
+                </div>
+                <p id="openAiError" class="connector-error" role="alert"></p>
+                <button id="openAiConnectBtn" class="btn secondary-action" type="button">
+                  <i data-lucide="shield-check" aria-hidden="true"></i>
+                  <span>Connect OpenAI agent</span>
+                </button>
+              </article>
 
-            <div class="field-row">
-              <label class="form-label" for="figmaUrls">Figma frame URLs</label>
-              <textarea
-                id="figmaUrls"
-                class="form-control"
-                rows="4"
-                disabled
-                spellcheck="false"
-                placeholder="Paste one Figma node URL per line. Example: https://figma.com/design/...?...node-id=104-22"
-              ></textarea>
+              <article class="setup-card">
+                <h3>Setup checks</h3>
+                <div id="repoChecks" class="repo-checks stacked" aria-live="polite"></div>
+              </article>
             </div>
 
-            <div class="field-row">
-              <label class="form-label" for="prompt">What should change?</label>
-              <textarea
-                id="prompt"
-                class="form-control"
-                rows="3"
-                disabled
-                placeholder="Example: Implement the new RSU insight summary screen and keep the current mobile folder structure."
-              ></textarea>
+            <p id="setupResult" class="stage-hint">
+              Setup will validate the repo, confirm the `development` branch, prepare the Snack entry, and hold the OpenAI key server-side.
+            </p>
+
+            <button id="runSetupBtn" class="btn primary-action stage-primary" type="button" disabled>
+              <i data-lucide="settings-2" aria-hidden="true"></i>
+              <span>Run repo setup</span>
+            </button>
+          </section>
+
+          <section class="panel stage-panel" data-step-panel="snack" aria-labelledby="snack-title">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Step 3</p>
+                <h2 id="snack-title">Open the app in Expo Snack live preview</h2>
+              </div>
+              <span id="previewState" class="badge rounded-pill text-bg-secondary">Waiting</span>
             </div>
 
-            <div class="branch-box">
-              <span>Branch that will be created</span>
-              <code id="branchName">figma/job-preview-design-update</code>
+            <div class="snack-workbench">
+              <div>
+                <div id="snackPlatformTabs" class="platform-tabs" role="group" aria-label="Expo Snack platform"></div>
+                <div class="snack-stage">
+                  <div id="snackLoading" class="snack-loading">
+                    <i data-lucide="loader-circle" aria-hidden="true"></i>
+                    <strong>Auto-run from repo</strong>
+                    <span>Setup opens the selected repo branch in Snack automatically.</span>
+                  </div>
+                  <iframe
+                    id="snackFrame"
+                    class="snack-frame"
+                    title="Expo Snack live app preview"
+                    loading="eager"
+                    allow="accelerometer; camera; encrypted-media; gyroscope; microphone"
+                  ></iframe>
+                </div>
+              </div>
+
+              <aside class="snack-side-panel">
+                <h3>Snack source</h3>
+                <dl class="snack-meta">
+                  <div>
+                    <dt>Repository</dt>
+                    <dd id="snackRepoName">rovia/frontend-mobile</dd>
+                  </div>
+                  <div>
+                    <dt>Branch</dt>
+                    <dd id="snackBranch">development</dd>
+                  </div>
+                  <div>
+                    <dt>Source</dt>
+                    <dd><a id="snackSourceLink" href="#" target="_blank" rel="noreferrer">Waiting for repo</a></dd>
+                  </div>
+                </dl>
+
+                <a id="openSnackLink" class="snack-open-link" href="https://snack.expo.dev" target="_blank" rel="noreferrer">
+                  <i data-lucide="external-link" aria-hidden="true"></i>
+                  <span>Open in Expo Snack</span>
+                </a>
+
+                <button id="snackNextBtn" class="btn primary-action stage-primary" type="button" disabled>
+                  <i data-lucide="sparkles" aria-hidden="true"></i>
+                  <span>Generate AI change plan</span>
+                </button>
+              </aside>
+            </div>
+          </section>
+
+          <section id="changePanel" class="panel stage-panel change-panel is-disabled" data-step-panel="plan" aria-labelledby="plan-title">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Step 4</p>
+                <h2 id="plan-title">Review AI-created Figma plan</h2>
+              </div>
+              <span id="jobIdBadge" class="badge rounded-pill text-bg-secondary">No job yet</span>
+            </div>
+
+            <div id="aiPlanSummary" class="ai-summary">
+              <span aria-hidden="true"><i data-lucide="sparkles"></i></span>
+              <div>
+                <strong>AI generated this from the connected Figma and repo context.</strong>
+                <p>Figma URL, prompt, branch name, and PR base are created automatically before code changes start.</p>
+              </div>
+            </div>
+
+            <div class="plan-grid">
+              <article class="plan-card">
+                <span>Figma frame URLs</span>
+                <textarea id="figmaUrls" class="form-control" rows="4" readonly spellcheck="false"></textarea>
+              </article>
+              <article class="plan-card">
+                <span>Generated prompt</span>
+                <textarea id="prompt" class="form-control" rows="4" readonly></textarea>
+              </article>
+              <article class="plan-card branch-box">
+                <span>Branch AI will create</span>
+                <code id="branchName">figma/job-preview-design-update</code>
+              </article>
+              <article class="plan-card branch-box">
+                <span>PR target</span>
+                <code>development</code>
+              </article>
             </div>
 
             <div id="formError" class="form-error" role="alert"></div>
 
             <button id="createJobBtn" class="btn primary-action stage-primary" type="button" disabled>
               <i data-lucide="play" aria-hidden="true"></i>
-              <span>Start change request</span>
+              <span>Start AI code changes</span>
             </button>
           </section>
 
           <section class="panel stage-panel progress-panel" data-step-panel="progress" aria-labelledby="progress-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Step 3</p>
-                <h2 id="progress-title">Watch the agent work</h2>
+                <p class="eyebrow">Step 5</p>
+                <h2 id="progress-title">Watch AI make the changes</h2>
               </div>
               <button id="clearJobBtn" class="btn text-action" type="button">
                 <i data-lucide="refresh-cw" aria-hidden="true"></i>
@@ -222,17 +311,17 @@
             </div>
 
             <p id="progressNextHint" class="stage-hint">
-              Screenshot and video evidence will appear automatically when Maestro finishes.
+              After code changes finish, the worker captures a changed screenshot and refreshes the Snack preview.
             </p>
           </section>
 
           <section class="panel stage-panel evidence-panel" data-step-panel="evidence" aria-labelledby="evidence-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Step 4</p>
-                <h2 id="evidence-title">Review the changed screen and recording</h2>
+                <p class="eyebrow">Step 6</p>
+                <h2 id="evidence-title">Changed UI in Snack and screenshots</h2>
               </div>
-              <span id="previewState" class="badge rounded-pill text-bg-secondary">Waiting</span>
+              <span id="evidenceBadge" class="badge rounded-pill text-bg-secondary">Waiting</span>
             </div>
 
             <div class="evidence-layout">
@@ -240,14 +329,14 @@
                 <div class="artifact-grid">
                   <article class="artifact-card">
                     <div class="artifact-heading">
-                      <span class="badge rounded-pill text-bg-secondary">Screen</span>
+                      <span class="badge rounded-pill text-bg-secondary">Snack</span>
                       <strong>Changed UI screenshot</strong>
                     </div>
                     <div id="screenshotProof" class="screenshot-proof is-waiting">
                       <div class="mock-phone-screen">
                         <span class="mock-status"></span>
-                        <strong>Waiting for Maestro screenshot</strong>
-                        <p>Screen capture appears here after the code changes and flow test finish.</p>
+                        <strong>Waiting for changed screen</strong>
+                        <p>After AI finishes, this screenshot is attached and shown beside Snack.</p>
                       </div>
                     </div>
                     <p id="screenshotArtifactMeta" class="artifact-meta">No screenshot captured yet.</p>
@@ -272,7 +361,7 @@
                 <div id="evidenceList" class="evidence-list"></div>
 
                 <p id="evidenceSummary" class="stage-hint">
-                  Build approval stays locked until validation, screenshot capture, and video recording pass.
+                  Build approval stays locked until validation, Snack refresh, screenshot capture, and video recording pass.
                 </p>
 
                 <button id="reviewBuildBtn" class="btn primary-action stage-primary" type="button" disabled>
@@ -281,50 +370,31 @@
                 </button>
               </div>
 
-              <aside class="preview-panel" aria-labelledby="preview-title">
+              <aside class="preview-panel" aria-labelledby="changed-snack-title">
                 <div class="section-title compact-title">
                   <div>
-                    <p class="eyebrow">Live preview</p>
-                    <h3 id="preview-title">Expo Snack live preview</h3>
+                    <p class="eyebrow">Snack after changes</p>
+                    <h3 id="changed-snack-title">Repo preview refreshed</h3>
                   </div>
                 </div>
-
-                <div id="snackPlatformTabs" class="platform-tabs" role="group" aria-label="Expo Snack platform"></div>
-
-                <div class="snack-stage">
-                  <div id="snackLoading" class="snack-loading">
-                    <i data-lucide="loader-circle" aria-hidden="true"></i>
-                    <strong>Auto-run from repo</strong>
-                    <span>Start a change request to load the generated branch preview.</span>
+                <div id="snackChangePreview" class="snack-change-preview">
+                  <div class="mock-phone-screen compact">
+                    <span class="mock-status ready"></span>
+                    <div class="mock-app-bar">
+                      <span></span>
+                      <strong>RSU Insights</strong>
+                      <span></span>
+                    </div>
+                    <div class="mock-stat-card">
+                      <small>Vesting value</small>
+                      <strong>$42,850</strong>
+                      <span>+18.4% this quarter</span>
+                    </div>
+                    <div class="mock-list-row"></div>
+                    <div class="mock-list-row short"></div>
                   </div>
-                  <iframe
-                    id="snackFrame"
-                    class="snack-frame"
-                    title="Expo Snack live app preview"
-                    loading="eager"
-                    allow="accelerometer; camera; encrypted-media; gyroscope; microphone"
-                  ></iframe>
                 </div>
-
-                <dl class="snack-meta">
-                  <div>
-                    <dt>Repository</dt>
-                    <dd id="snackRepoName">rovia/frontend-mobile</dd>
-                  </div>
-                  <div>
-                    <dt>Branch</dt>
-                    <dd id="snackBranch">development</dd>
-                  </div>
-                  <div>
-                    <dt>Source</dt>
-                    <dd><a id="snackSourceLink" href="#" target="_blank" rel="noreferrer">Waiting for repo</a></dd>
-                  </div>
-                </dl>
-
-                <a id="openSnackLink" class="snack-open-link" href="https://snack.expo.dev" target="_blank" rel="noreferrer">
-                  <i data-lucide="external-link" aria-hidden="true"></i>
-                  <span>Open in Expo Snack</span>
-                </a>
+                <p id="snackChangeMeta" class="stage-hint">Waiting for AI changes to finish.</p>
               </aside>
             </div>
           </section>
@@ -332,7 +402,7 @@
           <section class="panel stage-panel release-panel" data-step-panel="build" aria-labelledby="release-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Step 5</p>
+                <p class="eyebrow">Step 7</p>
                 <h2 id="release-title">Approve and generate the APK</h2>
               </div>
               <span id="buildState" class="badge rounded-pill text-bg-secondary">Blocked</span>

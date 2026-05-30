@@ -1,19 +1,16 @@
 # Dashboard Flow
 
-## Screen 1: Connect Agent And Tools
+## Screen 1: Connect Figma And Git
 
-Purpose: unlock the agent workspace before any code change can start.
+Purpose: connect the external tools before the dashboard shows repo setup.
 
 Required behavior:
-- Collect an OpenAI API key for the agent runtime.
-- Do not show the full API key after entry.
-- Do not write the API key into browser logs, worker logs, PR comments, screenshots, or recordings.
-- Store the key only through a backend secret/vault flow in the real implementation.
-- Connect Figma MCP after the OpenAI runtime is ready.
-- Connect GitHub/Git MCP after the OpenAI runtime is ready.
-- Keep future screens locked until OpenAI, Figma MCP, GitHub/Git MCP, and repository validation pass.
+- Connect Figma MCP.
+- Connect GitHub/Git MCP.
+- Keep repo setup locked until both tools are connected.
+- Do not ask for repo selection, Figma URL, prompt, branch, or APK options on this screen.
 
-## Screen 2: Repository Select
+## Screen 2: Repository Select And Setup
 
 Purpose: choose the target GitHub repository and validate it can support the workflow.
 
@@ -23,19 +20,36 @@ Required behavior:
 - Verify `development` exists before continuing.
 - Block the flow if `development` is missing.
 - Show the latest job/PR state for the selected repo when available.
+- Collect an OpenAI API key for the agent runtime during setup.
+- Do not show the full API key after entry.
+- Do not write the API key into browser logs, worker logs, PR comments, screenshots, or recordings.
+- Store the key only through a backend secret/vault flow in the real implementation.
+- Prepare the Snack-compatible entry before continuing.
 
-## Screen 3: Figma And Instructions
+## Screen 3: Expo Snack
 
-Purpose: collect implementation input.
+Purpose: open the selected app from the repo in Expo Snack before AI creates the implementation plan.
 
 Required behavior:
-- Accept multiple Figma URLs.
-- Validate each URL has a Figma file key and node ID when it is a design URL.
-- Let the user add plain-language implementation instructions.
-- Require at least one Figma URL and one selected repo.
-- Create a job when submitted.
+- Auto-run from the selected repo source URL after setup completes.
+- Show platform tabs for Android, iOS, web, and user device where supported.
+- Show repository, branch, and source file metadata.
+- Provide an external "Open in Expo Snack" action.
+- Keep the preview read-only.
 
-## Screen 4: Job Progress
+## Screen 4: AI-Created Change Plan
+
+Purpose: show the implementation inputs AI generated automatically.
+
+Required behavior:
+- Show one or more Figma URLs.
+- Show the generated implementation prompt.
+- Show the branch name that will be created.
+- Show PR target `development`.
+- Validate each Figma URL has a file key and node ID.
+- Let the user start code changes only after the generated plan is visible.
+
+## Screen 5: Job Progress
 
 Purpose: show live implementation status.
 
@@ -58,31 +72,16 @@ Required behavior:
 - Show raw logs only in an advanced/details panel.
 - Do not expose an IDE or terminal for manual editing in v1.
 
-## Screen 5: Live UI Preview
+## Screen 6: Changed UI Evidence
 
-Purpose: let users see the changing UI in the website while the worker is implementing and validating.
-
-Required behavior:
-- Show the latest preview snapshot for the changed screen or flow.
-- Show Expo Snack platform tabs for Android, iOS, web, and user device where supported.
-- Label each preview with route/screen name, display size, commit SHA, and capture time.
-- Refresh previews automatically when the worker reaches meaningful checkpoints.
-- If live preview cannot run, show the latest Maestro or worker-captured screenshot with a clear fallback state.
-- Keep previews read-only; users approve, reject, or comment from the dashboard rather than editing code directly.
-
-## Screen 6: Evidence Review
-
-Purpose: let the user review output before build.
+Purpose: let users review the completed UI change in Snack before build approval.
 
 Required behavior:
-- Show PR link and current branch.
-- Show implementation summary.
-- Show validation command results.
-- Show the Expo Snack live preview from the generated repo branch or preview artifact.
-- Show Maestro test status.
-- Show the changed UI screenshot as a first-class visual artifact.
-- Show the MP4 video recording as a first-class visual artifact.
-- Disable build approval if Maestro failed or required checks failed.
+- Show the refreshed Snack preview after implementation.
+- Show the changed UI screenshot beside Snack.
+- Label each preview with route/screen name, commit SHA, and capture time.
+- Show MP4 recording evidence.
+- If Snack cannot run, show the latest Maestro or worker-captured screenshot with a clear fallback state.
 
 ## Screen 7: Build Approval
 

@@ -2,19 +2,18 @@
 
 Feature One is a runnable dashboard scaffold for the core workflow:
 
-1. Add an OpenAI API key for the agent runtime.
-2. Connect Figma MCP and GitHub/Git MCP.
-3. Select a GitHub repository and verify the `development` branch requirement.
-4. Submit one or more Figma node URLs.
-5. Create a valid `figma/<job-id>-<slug>` branch plan.
-6. Track readable job progress without exposing terminal or IDE access.
-7. Review the changed UI screen, Expo Snack preview, and Maestro video recording.
-8. Approve a stage/prod Android APK build only after checks pass.
-9. Review APK, build screen, and build recording artifacts after generation.
+1. Connect Figma MCP and GitHub/Git MCP first.
+2. Select a GitHub repository and run repo/agent setup, including the required `development` branch check.
+3. Open the selected app in Expo Snack from the repo source.
+4. Let AI create the Figma URL, prompt, branch name, and PR target plan.
+5. Track readable job progress without exposing terminal or IDE access.
+6. Review the changed UI screenshot inside the Snack/evidence step.
+7. Approve a stage/prod Android APK build only after checks pass.
+8. Review APK, build screen, and build recording artifacts after generation.
 
 This first version uses local mock adapters so the product can be reviewed immediately. The next pass should replace the mock adapters with OpenAI API orchestration, GitHub MCP, Figma MCP, Maestro, and EAS worker integrations.
 
-The real implementation should never expose the OpenAI API key in browser logs or worker events. Collect it through the website, send it to the backend over TLS, store it server-side in an encrypted vault or environment secret, and pass only scoped runtime access to the worker.
+The real implementation should ask for Figma/Git connections first. The OpenAI API key belongs in the repo setup step and should never appear in browser logs or worker events. Send it to the backend over TLS, store it server-side in an encrypted vault or environment secret, and pass only scoped runtime access to the worker.
 
 UI controls should use Bootstrap component styles for standard elements such as buttons, selects, textareas, badges, segmented controls, and radio choices. Avoid hand-building common controls unless the component library cannot cover the interaction.
 

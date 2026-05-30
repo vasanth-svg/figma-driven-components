@@ -7,20 +7,19 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 ## Primary User Journey
 
 1. User opens the dashboard and signs in.
-2. User adds the OpenAI API key for the agent runtime.
-3. User connects Figma MCP and GitHub/Git MCP.
-4. User selects a GitHub repository and base branch context.
-5. Dashboard verifies the repository supports the workflow and that `development` exists.
-6. User pastes one or more Figma URLs, each pointing to a specific frame/node.
-7. User adds implementation instructions in chat-style text.
-8. Dashboard creates a release job and shows live progress.
-9. Worker creates a valid branch from `development` and runs the agent.
-10. Dashboard shows one focused workflow screen at a time, with live implementation progress and UI previews without exposing terminal or IDE access.
-11. Agent implements changes, validates them, and creates a draft PR to `development`.
-12. Agent runs Maestro, captures the changed UI screenshot and video recording, and posts evidence.
-13. User reviews the PR, Expo Snack live preview, changed UI screenshot, and Maestro video in the dashboard.
-14. User chooses `stage` or `prod` and explicitly approves APK generation.
-15. Worker builds an APK and publishes the APK, build screen, and build recording artifacts in the dashboard and PR.
+2. User connects Figma MCP and GitHub/Git MCP.
+3. User selects a GitHub repository and runs repo setup.
+4. Setup validates `development`, prepares the Snack entry, and connects the OpenAI agent runtime.
+5. Dashboard opens the selected app in Expo Snack from the repo source URL.
+6. AI creates the Figma URL, implementation prompt, branch name, and PR target automatically.
+7. User starts the AI code-change job.
+8. Worker creates a valid branch from `development` and runs the agent.
+9. Dashboard shows one focused workflow screen at a time, with live implementation progress and UI previews without exposing terminal or IDE access.
+10. Agent implements changes, validates them, and creates a draft PR to `development`.
+11. Agent runs Maestro, captures the changed UI screenshot and video recording, and posts evidence.
+12. User reviews the PR, Expo Snack live preview, changed UI screenshot, and Maestro video in the dashboard.
+13. User chooses `stage` or `prod` and explicitly approves APK generation.
+14. Worker builds an APK and publishes the APK, build screen, and build recording artifacts in the dashboard and PR.
 
 ## Personas
 
@@ -31,7 +30,8 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 ## V1 Requirements
 
 - Support multiple Figma URLs per job.
-- Require an OpenAI agent runtime connection before code changes can start.
+- Ask for Figma MCP and GitHub/Git MCP connection before repo setup.
+- Require an OpenAI agent runtime connection during repo setup before code changes can start.
 - Support one selected GitHub repo per job.
 - Create a branch using a valid deterministic name.
 - Open a draft PR against `development` every time.
@@ -42,6 +42,9 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 - Save APK, build result screen, and build recording as final build artifacts.
 - Hide terminal and IDE details from product/developer users; expose readable progress, diffs, preview screenshots, logs, and approvals in the website.
 - Show UI previews in the website while changes are being made by auto-running an Expo Snack preview from a repo-generated Snack entry file.
+- Open Expo Snack before AI creates the final Figma prompt and branch plan.
+- Show AI-created Figma URL, generated prompt, branch name, and PR target before starting code changes.
+- Show the changed UI screenshot beside the refreshed Snack preview after implementation.
 - Show the product flow one screen at a time so users are not overwhelmed by every panel at once.
 
 ## Out Of Scope For V1

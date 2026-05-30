@@ -336,6 +336,34 @@ h3 {
   color: var(--muted);
 }
 
+.setup-grid,
+.snack-workbench,
+.plan-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.setup-card,
+.plan-card,
+.snack-side-panel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfcfd;
+  padding: 16px;
+}
+
+.setup-card p,
+.plan-card p,
+.snack-side-panel p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
 .input-group-text {
   background: #f7fafb;
   color: var(--muted);
@@ -499,6 +527,11 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.repo-checks.stacked {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+
 .repo-check {
   display: flex;
   align-items: flex-start;
@@ -548,6 +581,10 @@ textarea:focus {
   border-radius: 10px;
   background: #eef3f6;
   padding: 12px;
+}
+
+.plan-card.branch-box {
+  margin-top: 0;
 }
 
 .branch-box span {
@@ -689,6 +726,41 @@ textarea:focus {
   white-space: pre-wrap;
 }
 
+.ai-summary {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 18px;
+  border: 1px solid #bed7d3;
+  border-radius: 12px;
+  background: #eef9f6;
+  color: #245c55;
+  padding: 14px;
+}
+
+.ai-summary > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 999px;
+  background: #d9f0eb;
+  color: var(--teal-strong);
+}
+
+.ai-summary p {
+  margin-bottom: 0;
+  color: #47625e;
+}
+
+.plan-card > span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
 .evidence-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 430px);
@@ -738,6 +810,11 @@ textarea:focus {
   background: #f8fbfc;
   padding: 18px 14px;
   box-shadow: 0 20px 34px rgba(15, 23, 42, 0.14);
+}
+
+.mock-phone-screen.compact {
+  width: min(235px, 88%);
+  min-height: 340px;
 }
 
 .mock-phone-screen > p {
@@ -863,6 +940,19 @@ textarea:focus {
   border-radius: 12px;
   background: #fbfcfd;
   padding: 14px;
+}
+
+.snack-side-panel {
+  align-self: start;
+}
+
+.snack-change-preview {
+  display: grid;
+  min-height: 440px;
+  place-items: center;
+  border-radius: 16px;
+  background: #eef3f5;
+  padding: 12px;
 }
 
 .platform-tabs {
@@ -1110,13 +1200,16 @@ textarea:focus {
 @media (max-width: 1180px) {
   .hero,
   .command-layout,
-  .evidence-layout {
+  .evidence-layout,
+  .setup-grid,
+  .snack-workbench,
+  .plan-grid {
     grid-template-columns: 1fr;
   }
 
   .step-rail {
     position: static;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
   .step-nav {
@@ -1143,7 +1236,10 @@ textarea:focus {
   .repo-checks,
   .timeline,
   .artifact-grid,
-  .profile-choice {
+  .profile-choice,
+  .setup-grid,
+  .snack-workbench,
+  .plan-grid {
     grid-template-columns: 1fr;
   }
 

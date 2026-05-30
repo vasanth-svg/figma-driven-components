@@ -22,20 +22,22 @@ Read the docs in order for the full product and engineering plan. The `skills/` 
 
 ## Core Flow
 
-1. User adds the OpenAI API key for the agent runtime.
-2. User connects Figma MCP and GitHub/Git MCP.
-3. User selects a GitHub repo.
-4. User submits one or more Figma URLs and implementation instructions.
-5. Worker verifies the repo, reads repo instructions, validates `development`, and creates a valid feature branch.
-6. Agent fetches Figma context and implements changes in the selected repo.
-7. Agent runs lint/typecheck and creates or updates a draft PR to `development`.
-8. Agent creates/runs Maestro tests, captures the changed UI screenshot and MP4 video, and attaches evidence.
-9. User reviews evidence and approves stage or prod APK generation.
-10. Worker generates the APK and attaches the APK, build screen, and build recording artifacts.
+1. User connects Figma MCP and GitHub/Git MCP.
+2. User selects a GitHub repo and runs setup.
+3. Setup connects the OpenAI runtime, validates `development`, and prepares the Snack entry.
+4. Dashboard opens the selected app in Expo Snack.
+5. AI creates the Figma URLs, implementation prompt, branch name, and PR target automatically.
+6. User starts the AI code-change job.
+7. Worker verifies the repo, reads repo instructions, validates `development`, and creates a valid feature branch.
+8. Agent fetches Figma context and implements changes in the selected repo.
+9. Agent runs lint/typecheck and creates or updates a draft PR to `development`.
+10. Agent creates/runs Maestro tests, captures the changed Snack screenshot and MP4 video, and attaches evidence.
+11. User reviews evidence and approves stage or prod APK generation.
+12. Worker generates the APK and attaches the APK, build screen, and build recording artifacts.
 
 ## Delivery Sequence
 
-Plan 1 is the foundation: OpenAI runtime connection, Figma URLs, repo selection, GitHub PR to `development`, Maestro evidence, approval, and APK build.
+Plan 1 is the foundation: Figma/Git connection, repo setup, Snack preview, AI-created Figma/prompt/branch plan, GitHub PR to `development`, Maestro evidence, approval, and APK build.
 
 Plan 2 adds the website control-room layer: no terminal or IDE exposure for users, one focused screen at a time, live/read-only UI previews during work, and evidence previews before approval.
 

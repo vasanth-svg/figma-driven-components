@@ -29,7 +29,13 @@ for (const phrase of [
   "Connect OpenAI agent",
   "Connect Figma MCP",
   "Connect Git repository",
+  "Run repo setup",
+  "Open the app in Expo Snack",
+  "Generate AI change plan",
   "data-step-panel=\"connect\"",
+  "data-step-panel=\"setup\"",
+  "data-step-panel=\"snack\"",
+  "data-step-panel=\"plan\"",
   "data-step-panel=\"evidence\"",
   "Figma frame URLs",
   "Expo Snack live preview",
@@ -49,8 +55,10 @@ for (const phrase of [
 const app = readFileSync(join(root, "apps/web/src/app.js"), "utf8");
 if (!app.includes("createIcons")) failures.push("UI must initialize Lucide icons.");
 if (!html.includes("vendor/bootstrap")) failures.push("UI must use the Bootstrap component library.");
-if (!app.includes("openAiConnected")) failures.push("UI must gate changes behind an OpenAI API key connection.");
+if (!app.includes("isConnectReady")) failures.push("UI must connect Figma MCP and GitHub/Git MCP before setup.");
+if (!app.includes("openAiConnected")) failures.push("UI must connect the OpenAI API key during setup.");
 if (!html.includes("stage-viewport")) failures.push("UI must render a one-screen-at-a-time step flow.");
+if (!app.includes("generateAiPlan")) failures.push("UI must auto-generate the Figma URL, prompt, and branch plan.");
 if (!app.includes("evidenceArtifacts")) failures.push("UI must expose screenshot and video evidence artifacts.");
 if (!app.includes("buildArtifacts")) failures.push("UI must expose generated build artifacts.");
 if (!app.includes("https://snack.expo.dev/")) failures.push("UI must build Expo Snack preview URLs.");
