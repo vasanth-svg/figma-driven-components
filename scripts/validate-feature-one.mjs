@@ -24,7 +24,13 @@ for (const file of requiredFiles) {
 }
 
 const html = readFileSync(join(root, "apps/web/index.html"), "utf8");
-for (const phrase of ["Repository", "Figma URLs", "UI Preview", "Maestro evidence", "APK approval gate"]) {
+for (const phrase of [
+  "Connect Figma MCP",
+  "Connect Git repository",
+  "Figma frame URLs",
+  "Real mobile screen",
+  "APK approval",
+]) {
   if (!html.includes(phrase)) failures.push(`UI missing phrase: ${phrase}`);
 }
 
