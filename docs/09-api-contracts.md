@@ -18,8 +18,33 @@ export type JobStatus =
 
 export type BuildChoice = "stage" | "prod";
 export type EasProfile = "preview" | "production";
-export type ArtifactKind = "figma_screenshot" | "maestro_screenshot" | "maestro_video" | "log" | "apk";
+export type ArtifactKind =
+  | "figma_screenshot"
+  | "maestro_screenshot"
+  | "maestro_video"
+  | "build_screen"
+  | "build_video"
+  | "log"
+  | "apk";
 ```
+
+## Connect Agent Runtime
+
+`POST /api/agent-runtime/openai-key`
+
+```ts
+export type ConnectOpenAiKeyRequest = {
+  apiKey: string;
+};
+
+export type ConnectOpenAiKeyResponse = {
+  connected: true;
+  keyLabel: string;
+  runtimeId: string;
+};
+```
+
+The API key must be accepted only by the backend over TLS, stored in an encrypted vault or environment secret, and never returned in full. Worker logs, job events, PR comments, screenshots, and recordings must use only `runtimeId` or `keyLabel`.
 
 ## Create Job
 
@@ -27,6 +52,7 @@ export type ArtifactKind = "figma_screenshot" | "maestro_screenshot" | "maestro_
 
 ```ts
 export type CreateJobRequest = {
+  runtimeId: string;
   repoId: string;
   repositoryFullName: string;
   figmaUrls: string[];
@@ -133,6 +159,8 @@ export type BuildResult = {
   choice: BuildChoice;
   easProfile: EasProfile;
   apkArtifactId?: string;
+  buildScreenArtifactId?: string;
+  buildVideoArtifactId?: string;
   easBuildUrl?: string;
   commitSha: string;
   status: "queued" | "running" | "complete" | "failed";
@@ -157,6 +185,7 @@ Use for build status changes and final APK artifact discovery.
 ## Invariants
 
 - `baseBranch` is always `development`.
+- `CreateJobRequest` is rejected unless a connected OpenAI runtime exists.
 - `ApproveBuildRequest` is rejected unless job status is `awaiting_review`.
 - `ApproveBuildRequest` is rejected if Maestro did not pass.
 - `prod` maps to `production`; `stage` maps to `preview`.

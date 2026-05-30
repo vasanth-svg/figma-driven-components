@@ -76,7 +76,7 @@ export const jobSteps = [
   {
     id: "testing_flow",
     label: "Maestro evidence",
-    description: "Android screenshots and flow recording.",
+    description: "Changed UI screenshot and flow recording.",
   },
   {
     id: "awaiting_review",
@@ -88,7 +88,7 @@ export const jobSteps = [
     label: "Build APK",
     description: "EAS preview or production profile after approval.",
   },
-  { id: "complete", label: "Complete", description: "APK artifact is ready." },
+  { id: "complete", label: "Complete", description: "APK, screen, and recording artifacts are ready." },
 ];
 
 export const snackPlatforms = [

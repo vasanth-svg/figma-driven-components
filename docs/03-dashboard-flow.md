@@ -1,6 +1,19 @@
 # Dashboard Flow
 
-## Screen 1: Repository Select
+## Screen 1: Connect Agent And Tools
+
+Purpose: unlock the agent workspace before any code change can start.
+
+Required behavior:
+- Collect an OpenAI API key for the agent runtime.
+- Do not show the full API key after entry.
+- Do not write the API key into browser logs, worker logs, PR comments, screenshots, or recordings.
+- Store the key only through a backend secret/vault flow in the real implementation.
+- Connect Figma MCP after the OpenAI runtime is ready.
+- Connect GitHub/Git MCP after the OpenAI runtime is ready.
+- Keep future screens locked until OpenAI, Figma MCP, GitHub/Git MCP, and repository validation pass.
+
+## Screen 2: Repository Select
 
 Purpose: choose the target GitHub repository and validate it can support the workflow.
 
@@ -11,7 +24,7 @@ Required behavior:
 - Block the flow if `development` is missing.
 - Show the latest job/PR state for the selected repo when available.
 
-## Screen 2: Figma And Instructions
+## Screen 3: Figma And Instructions
 
 Purpose: collect implementation input.
 
@@ -22,7 +35,7 @@ Required behavior:
 - Require at least one Figma URL and one selected repo.
 - Create a job when submitted.
 
-## Screen 3: Job Progress
+## Screen 4: Job Progress
 
 Purpose: show live implementation status.
 
@@ -45,19 +58,19 @@ Required behavior:
 - Show raw logs only in an advanced/details panel.
 - Do not expose an IDE or terminal for manual editing in v1.
 
-## Screen 4: Live UI Preview
+## Screen 5: Live UI Preview
 
 Purpose: let users see the changing UI in the website while the worker is implementing and validating.
 
 Required behavior:
 - Show the latest preview snapshot for the changed screen or flow.
-- Show display-size tabs for compact phone, large phone, tablet, and desktop/web where supported.
+- Show Expo Snack platform tabs for Android, iOS, web, and user device where supported.
 - Label each preview with route/screen name, display size, commit SHA, and capture time.
 - Refresh previews automatically when the worker reaches meaningful checkpoints.
 - If live preview cannot run, show the latest Maestro or worker-captured screenshot with a clear fallback state.
 - Keep previews read-only; users approve, reject, or comment from the dashboard rather than editing code directly.
 
-## Screen 5: Evidence Review
+## Screen 6: Evidence Review
 
 Purpose: let the user review output before build.
 
@@ -67,10 +80,11 @@ Required behavior:
 - Show validation command results.
 - Show the Expo Snack live preview from the generated repo branch or preview artifact.
 - Show Maestro test status.
-- Show screenshots and video recording.
+- Show the changed UI screenshot as a first-class visual artifact.
+- Show the MP4 video recording as a first-class visual artifact.
 - Disable build approval if Maestro failed or required checks failed.
 
-## Screen 6: Build Approval
+## Screen 7: Build Approval
 
 Purpose: explicitly approve Android APK generation.
 
@@ -81,12 +95,14 @@ Required behavior:
 - Record approver, timestamp, selected profile, branch, PR, and commit SHA.
 - Start build only after approval.
 
-## Screen 7: Build Result
+## Screen 8: Build Result
 
 Purpose: expose the final artifact.
 
 Required behavior:
 - Show APK download URL.
+- Show the build result screen artifact.
+- Show the build recording artifact.
 - Show build profile and EAS build link/logs.
 - Show PR, branch, commit SHA, and job ID.
 - Allow copying release summary.

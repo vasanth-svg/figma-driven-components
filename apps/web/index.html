@@ -16,26 +16,93 @@
           </div>
           <div>
             <p class="eyebrow">Feature One</p>
-            <h1>Ship Figma changes to a mobile PR</h1>
+            <h1>Run a Figma-to-APK agent workspace</h1>
           </div>
         </div>
         <p class="hero-copy">
-          Connect Figma MCP and GitHub/Git MCP first. Once both are connected, the dashboard unlocks the change form, creates a safe branch, auto-runs the Expo Snack preview from the repo, and gates APK builds behind approval.
+          Add the OpenAI API key, connect Figma MCP and GitHub/Git MCP, then move through one focused screen at a time: change request, agent work, screenshot/video evidence, and approval-gated APK generation.
         </p>
       </header>
 
-      <main class="layout">
-        <section class="work-column" aria-label="Workflow">
-          <section class="panel connect-panel" aria-labelledby="connect-title">
+      <main class="command-layout" aria-label="Figma-to-APK workflow">
+        <nav class="step-rail" aria-label="Release workflow steps">
+          <button class="btn step-nav is-active" type="button" data-step-target="connect">
+            <span class="step-number">1</span>
+            <span>
+              <strong>Connect</strong>
+              <small>OpenAI, Figma, Git</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="change" disabled>
+            <span class="step-number">2</span>
+            <span>
+              <strong>Request</strong>
+              <small>Repo and Figma URLs</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="progress" disabled>
+            <span class="step-number">3</span>
+            <span>
+              <strong>Work</strong>
+              <small>Readable agent status</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="evidence" disabled>
+            <span class="step-number">4</span>
+            <span>
+              <strong>Evidence</strong>
+              <small>Screen and video</small>
+            </span>
+          </button>
+          <button class="btn step-nav" type="button" data-step-target="build" disabled>
+            <span class="step-number">5</span>
+            <span>
+              <strong>Build</strong>
+              <small>Approve APK</small>
+            </span>
+          </button>
+        </nav>
+
+        <section class="stage-viewport" aria-live="polite">
+          <section class="panel stage-panel is-active" data-step-panel="connect" aria-labelledby="connect-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Start here</p>
-                <h2 id="connect-title">Connect your tools</h2>
+                <p class="eyebrow">Step 1</p>
+                <h2 id="connect-title">Connect the agent runtime and tools</h2>
               </div>
               <span id="gateBadge" class="badge rounded-pill text-bg-secondary">Locked</span>
             </div>
 
-            <div class="connector-grid">
+            <div class="connector-grid three-up">
+              <article id="openAiCard" class="connector-card" aria-labelledby="openai-title">
+                <div class="connector-top">
+                  <div class="connector-icon openai-icon" aria-hidden="true">
+                    <i data-lucide="brain-circuit"></i>
+                  </div>
+                  <span id="openAiStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
+                </div>
+                <h3 id="openai-title">OpenAI API key</h3>
+                <p>Required for the agent that plans code changes, coordinates MCP tools, and explains progress.</p>
+                <label class="form-label" for="openAiKeyInput">API key</label>
+                <div class="input-group">
+                  <span class="input-group-text" aria-hidden="true">
+                    <i data-lucide="key-round"></i>
+                  </span>
+                  <input
+                    id="openAiKeyInput"
+                    class="form-control"
+                    type="password"
+                    autocomplete="off"
+                    placeholder="sk-proj-..."
+                  />
+                </div>
+                <p id="openAiError" class="connector-error" role="alert"></p>
+                <button id="openAiConnectBtn" class="btn secondary-action" type="button">
+                  <i data-lucide="shield-check" aria-hidden="true"></i>
+                  <span>Connect OpenAI agent</span>
+                </button>
+              </article>
+
               <article id="figmaCard" class="connector-card" aria-labelledby="figma-title">
                 <div class="connector-top">
                   <div class="connector-icon figma-icon" aria-hidden="true">
@@ -45,7 +112,7 @@
                 </div>
                 <h3 id="figma-title">Figma MCP</h3>
                 <p>Required for design context, node screenshots, metadata fallback, and asset references.</p>
-                <button id="figmaConnectBtn" class="btn secondary-action" type="button">
+                <button id="figmaConnectBtn" class="btn secondary-action" type="button" disabled>
                   <i data-lucide="plug-zap" aria-hidden="true"></i>
                   <span>Connect Figma MCP</span>
                 </button>
@@ -60,7 +127,7 @@
                 </div>
                 <h3 id="git-title">GitHub / Git MCP</h3>
                 <p>Required for repo access, branch validation, PR creation, and status comments.</p>
-                <button id="gitConnectBtn" class="btn secondary-action" type="button">
+                <button id="gitConnectBtn" class="btn secondary-action" type="button" disabled>
                   <i data-lucide="git-pull-request-create" aria-hidden="true"></i>
                   <span>Connect Git repository</span>
                 </button>
@@ -69,14 +136,19 @@
 
             <div id="gateMessage" class="gate-message" role="status">
               <i data-lucide="lock-keyhole" aria-hidden="true"></i>
-              Connect Figma MCP and GitHub/Git MCP to unlock changes.
+              Add the OpenAI API key first, then connect Figma MCP and GitHub/Git MCP.
             </div>
+
+            <button id="connectNextBtn" class="btn primary-action stage-primary" type="button" disabled>
+              <i data-lucide="arrow-right" aria-hidden="true"></i>
+              <span>Continue to change request</span>
+            </button>
           </section>
 
-          <section id="changePanel" class="panel change-panel is-disabled" aria-labelledby="change-title">
+          <section id="changePanel" class="panel stage-panel change-panel is-disabled" data-step-panel="change" aria-labelledby="change-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Change request</p>
+                <p class="eyebrow">Step 2</p>
                 <h2 id="change-title">Tell the agent what to build</h2>
               </div>
               <span id="jobIdBadge" class="badge rounded-pill text-bg-secondary">No job yet</span>
@@ -120,17 +192,17 @@
 
             <div id="formError" class="form-error" role="alert"></div>
 
-            <button id="createJobBtn" class="btn primary-action" type="button" disabled>
+            <button id="createJobBtn" class="btn primary-action stage-primary" type="button" disabled>
               <i data-lucide="play" aria-hidden="true"></i>
               <span>Start change request</span>
             </button>
           </section>
 
-          <section class="panel progress-panel" aria-labelledby="progress-title">
+          <section class="panel stage-panel progress-panel" data-step-panel="progress" aria-labelledby="progress-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Progress</p>
-                <h2 id="progress-title">Plain-English status</h2>
+                <p class="eyebrow">Step 3</p>
+                <h2 id="progress-title">Watch the agent work</h2>
               </div>
               <button id="clearJobBtn" class="btn text-action" type="button">
                 <i data-lucide="refresh-cw" aria-hidden="true"></i>
@@ -148,67 +220,127 @@
                 <pre id="rawLog">No worker logs yet.</pre>
               </details>
             </div>
-          </section>
-        </section>
 
-        <aside class="preview-column" aria-label="Expo Snack preview and release">
-          <section class="panel preview-panel" aria-labelledby="preview-title">
+            <p id="progressNextHint" class="stage-hint">
+              Screenshot and video evidence will appear automatically when Maestro finishes.
+            </p>
+          </section>
+
+          <section class="panel stage-panel evidence-panel" data-step-panel="evidence" aria-labelledby="evidence-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Live preview</p>
-                <h2 id="preview-title">Expo Snack live preview</h2>
+                <p class="eyebrow">Step 4</p>
+                <h2 id="evidence-title">Review the changed screen and recording</h2>
               </div>
               <span id="previewState" class="badge rounded-pill text-bg-secondary">Waiting</span>
             </div>
 
-            <div id="snackPlatformTabs" class="platform-tabs" role="group" aria-label="Expo Snack platform"></div>
+            <div class="evidence-layout">
+              <div>
+                <div class="artifact-grid">
+                  <article class="artifact-card">
+                    <div class="artifact-heading">
+                      <span class="badge rounded-pill text-bg-secondary">Screen</span>
+                      <strong>Changed UI screenshot</strong>
+                    </div>
+                    <div id="screenshotProof" class="screenshot-proof is-waiting">
+                      <div class="mock-phone-screen">
+                        <span class="mock-status"></span>
+                        <strong>Waiting for Maestro screenshot</strong>
+                        <p>Screen capture appears here after the code changes and flow test finish.</p>
+                      </div>
+                    </div>
+                    <p id="screenshotArtifactMeta" class="artifact-meta">No screenshot captured yet.</p>
+                    <code id="screenshotArtifactPath">artifacts/pending/screen.png</code>
+                  </article>
 
-            <div class="snack-stage">
-              <div id="snackLoading" class="snack-loading">
-                <i data-lucide="loader-circle" aria-hidden="true"></i>
-                <strong>Auto-run from repo</strong>
-                <span>Connect Figma MCP and GitHub/Git MCP to start the live Snack preview.</span>
+                  <article class="artifact-card">
+                    <div class="artifact-heading">
+                      <span class="badge rounded-pill text-bg-secondary">Video</span>
+                      <strong>Flow recording</strong>
+                    </div>
+                    <div id="videoProof" class="video-proof is-waiting">
+                      <i data-lucide="play-circle" aria-hidden="true"></i>
+                      <strong>Waiting for MP4 recording</strong>
+                      <p>The full user flow recording appears here before APK approval.</p>
+                    </div>
+                    <p id="videoArtifactMeta" class="artifact-meta">No recording captured yet.</p>
+                    <code id="videoArtifactPath">artifacts/pending/flow.mp4</code>
+                  </article>
+                </div>
+
+                <div id="evidenceList" class="evidence-list"></div>
+
+                <p id="evidenceSummary" class="stage-hint">
+                  Build approval stays locked until validation, screenshot capture, and video recording pass.
+                </p>
+
+                <button id="reviewBuildBtn" class="btn primary-action stage-primary" type="button" disabled>
+                  <i data-lucide="arrow-right" aria-hidden="true"></i>
+                  <span>Continue to APK approval</span>
+                </button>
               </div>
-              <iframe
-                id="snackFrame"
-                class="snack-frame"
-                title="Expo Snack live app preview"
-                loading="eager"
-                allow="accelerometer; camera; encrypted-media; gyroscope; microphone"
-              ></iframe>
+
+              <aside class="preview-panel" aria-labelledby="preview-title">
+                <div class="section-title compact-title">
+                  <div>
+                    <p class="eyebrow">Live preview</p>
+                    <h3 id="preview-title">Expo Snack live preview</h3>
+                  </div>
+                </div>
+
+                <div id="snackPlatformTabs" class="platform-tabs" role="group" aria-label="Expo Snack platform"></div>
+
+                <div class="snack-stage">
+                  <div id="snackLoading" class="snack-loading">
+                    <i data-lucide="loader-circle" aria-hidden="true"></i>
+                    <strong>Auto-run from repo</strong>
+                    <span>Start a change request to load the generated branch preview.</span>
+                  </div>
+                  <iframe
+                    id="snackFrame"
+                    class="snack-frame"
+                    title="Expo Snack live app preview"
+                    loading="eager"
+                    allow="accelerometer; camera; encrypted-media; gyroscope; microphone"
+                  ></iframe>
+                </div>
+
+                <dl class="snack-meta">
+                  <div>
+                    <dt>Repository</dt>
+                    <dd id="snackRepoName">rovia/frontend-mobile</dd>
+                  </div>
+                  <div>
+                    <dt>Branch</dt>
+                    <dd id="snackBranch">development</dd>
+                  </div>
+                  <div>
+                    <dt>Source</dt>
+                    <dd><a id="snackSourceLink" href="#" target="_blank" rel="noreferrer">Waiting for repo</a></dd>
+                  </div>
+                </dl>
+
+                <a id="openSnackLink" class="snack-open-link" href="https://snack.expo.dev" target="_blank" rel="noreferrer">
+                  <i data-lucide="external-link" aria-hidden="true"></i>
+                  <span>Open in Expo Snack</span>
+                </a>
+              </aside>
             </div>
-
-            <dl class="snack-meta">
-              <div>
-                <dt>Repository</dt>
-                <dd id="snackRepoName">rovia/frontend-mobile</dd>
-              </div>
-              <div>
-                <dt>Branch</dt>
-                <dd id="snackBranch">development</dd>
-              </div>
-              <div>
-                <dt>Source</dt>
-                <dd><a id="snackSourceLink" href="#" target="_blank" rel="noreferrer">Waiting for repo</a></dd>
-              </div>
-            </dl>
-
-            <a id="openSnackLink" class="snack-open-link" href="https://snack.expo.dev" target="_blank" rel="noreferrer">
-              <i data-lucide="external-link" aria-hidden="true"></i>
-              <span>Open in Expo Snack</span>
-            </a>
           </section>
 
-          <section class="panel release-panel" aria-labelledby="release-title">
+          <section class="panel stage-panel release-panel" data-step-panel="build" aria-labelledby="release-title">
             <div class="section-title">
               <div>
-                <p class="eyebrow">Release</p>
-                <h2 id="release-title">APK approval</h2>
+                <p class="eyebrow">Step 5</p>
+                <h2 id="release-title">Approve and generate the APK</h2>
               </div>
               <span id="buildState" class="badge rounded-pill text-bg-secondary">Blocked</span>
             </div>
 
-            <div id="evidenceList" class="evidence-list"></div>
+            <p id="releaseSummary" class="stage-hint">
+              Stage maps to EAS preview. Prod maps to EAS production. v1 generates APK artifacts only.
+            </p>
 
             <fieldset class="profile-choice" aria-label="Choose build target">
               <legend>Choose build target</legend>
@@ -224,7 +356,7 @@
               </label>
             </fieldset>
 
-            <button id="approveBuildBtn" class="btn primary-action" type="button" disabled>
+            <button id="approveBuildBtn" class="btn primary-action stage-primary" type="button" disabled>
               <i data-lucide="package-check" aria-hidden="true"></i>
               <span>Approve APK build</span>
             </button>
@@ -232,8 +364,32 @@
             <p id="buildResult" class="build-result">
               Build approval unlocks after validation and Maestro evidence pass.
             </p>
+
+            <div id="buildArtifactPanel" class="build-artifacts is-empty">
+              <article>
+                <span class="artifact-icon" aria-hidden="true"><i data-lucide="package"></i></span>
+                <div>
+                  <strong>APK artifact</strong>
+                  <code id="apkArtifactPath">Waiting for approval</code>
+                </div>
+              </article>
+              <article>
+                <span class="artifact-icon" aria-hidden="true"><i data-lucide="image"></i></span>
+                <div>
+                  <strong>Build result screen</strong>
+                  <code id="buildScreenPath">Waiting for build</code>
+                </div>
+              </article>
+              <article>
+                <span class="artifact-icon" aria-hidden="true"><i data-lucide="video"></i></span>
+                <div>
+                  <strong>Build recording</strong>
+                  <code id="buildRecordingPath">Waiting for build</code>
+                </div>
+              </article>
+            </div>
           </section>
-        </aside>
+        </section>
       </main>
     </div>
 

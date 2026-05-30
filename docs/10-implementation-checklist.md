@@ -2,8 +2,8 @@
 
 ## Delivery Order
 
-- [ ] Plan 1 first: Figma input, repo selection, branch/PR to `development`, Maestro evidence, approval, and APK build.
-- [ ] Plan 2 second: terminal-free website control room and Expo Snack live previews.
+- [ ] Plan 1 first: OpenAI runtime connection, Figma input, repo selection, branch/PR to `development`, Maestro evidence, approval, and APK build.
+- [ ] Plan 2 second: terminal-free website control room, one-screen-at-a-time workflow, and Expo Snack live previews.
 
 ## Phase 1: Repository And Docs
 
@@ -15,17 +15,19 @@
 ## Phase 2: Dashboard UI
 
 - [ ] Use Bootstrap component styles for standard controls such as buttons, selects, textareas, badges, segmented controls, and radio choices.
+- [ ] Use progressive disclosure: show only the current workflow screen and keep future screens locked until available.
 - [ ] Build authentication shell.
+- [ ] Build OpenAI API key connection screen; backend stores the key in encrypted server-side secret storage and never logs it.
 - [ ] Build repo selector.
 - [ ] Verify `development` exists before allowing job creation.
 - [ ] Build Figma URL input with multiple URL support.
 - [ ] Build job progress timeline.
 - [ ] Build a terminal-free job activity view with readable events and advanced raw logs.
 - [ ] Build live UI preview panel for changed screens while implementation is running.
-- [ ] Build display-size preview tabs for compact phone, large phone, tablet, and desktop/web when supported.
-- [ ] Build evidence review screen with screenshots/video.
+- [ ] Build Expo Snack platform tabs for Android, iOS, web, and device QR when supported.
+- [ ] Build evidence review screen with the changed UI screenshot and MP4 video recording visible before approval.
 - [ ] Build approval UI for `stage` and `prod`.
-- [ ] Build final APK result screen.
+- [ ] Build final APK result screen with APK artifact, build result screen, and build recording visible after generation.
 
 ## Phase 3: Worker
 
