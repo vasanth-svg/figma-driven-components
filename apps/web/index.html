@@ -10,7 +10,9 @@
     <div class="page-shell">
       <header class="hero">
         <div class="brand-row">
-          <div class="brand-mark" aria-hidden="true">FC</div>
+          <div class="brand-mark" aria-hidden="true">
+            <i data-lucide="workflow"></i>
+          </div>
           <div>
             <p class="eyebrow">Feature One</p>
             <h1>Ship Figma changes to a mobile PR</h1>
@@ -35,26 +37,37 @@
             <div class="connector-grid">
               <article id="figmaCard" class="connector-card" aria-labelledby="figma-title">
                 <div class="connector-top">
-                  <div class="connector-icon figma-icon" aria-hidden="true"></div>
+                  <div class="connector-icon figma-icon" aria-hidden="true">
+                    <i data-lucide="palette"></i>
+                  </div>
                   <span id="figmaStatus" class="status-chip disconnected">Not connected</span>
                 </div>
                 <h3 id="figma-title">Figma MCP</h3>
                 <p>Required for design context, node screenshots, metadata fallback, and asset references.</p>
-                <button id="figmaConnectBtn" class="secondary-action" type="button">Connect Figma MCP</button>
+                <button id="figmaConnectBtn" class="secondary-action" type="button">
+                  <i data-lucide="plug-zap" aria-hidden="true"></i>
+                  <span>Connect Figma MCP</span>
+                </button>
               </article>
 
               <article id="gitCard" class="connector-card" aria-labelledby="git-title">
                 <div class="connector-top">
-                  <div class="connector-icon git-icon" aria-hidden="true"></div>
+                  <div class="connector-icon git-icon" aria-hidden="true">
+                    <i data-lucide="folder-git-2"></i>
+                  </div>
                   <span id="gitStatus" class="status-chip disconnected">Not connected</span>
                 </div>
                 <h3 id="git-title">GitHub / Git MCP</h3>
                 <p>Required for repo access, branch validation, PR creation, and status comments.</p>
-                <button id="gitConnectBtn" class="secondary-action" type="button">Connect Git repository</button>
+                <button id="gitConnectBtn" class="secondary-action" type="button">
+                  <i data-lucide="git-pull-request-create" aria-hidden="true"></i>
+                  <span>Connect Git repository</span>
+                </button>
               </article>
             </div>
 
             <div id="gateMessage" class="gate-message" role="status">
+              <i data-lucide="lock-keyhole" aria-hidden="true"></i>
               Connect Figma MCP and GitHub/Git MCP to unlock changes.
             </div>
           </section>
@@ -105,7 +118,8 @@
             <div id="formError" class="form-error" role="alert"></div>
 
             <button id="createJobBtn" class="primary-action" type="button" disabled>
-              Start change request
+              <i data-lucide="play" aria-hidden="true"></i>
+              <span>Start change request</span>
             </button>
           </section>
 
@@ -115,7 +129,10 @@
                 <p class="eyebrow">Progress</p>
                 <h2 id="progress-title">Plain-English status</h2>
               </div>
-              <button id="clearJobBtn" class="text-action" type="button">Reset</button>
+              <button id="clearJobBtn" class="text-action" type="button">
+                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                <span>Reset</span>
+              </button>
             </div>
 
             <ol id="timeline" class="timeline"></ol>
@@ -157,12 +174,16 @@
 
                   <div class="mobile-screen">
                     <header class="mobile-header">
-                      <button type="button" aria-label="Back"></button>
+                      <button type="button" aria-label="Back">
+                        <i data-lucide="arrow-left" aria-hidden="true"></i>
+                      </button>
                       <div>
                         <span>Rovia</span>
                         <strong>RSU Insights</strong>
                       </div>
-                      <button type="button" aria-label="Notifications"></button>
+                      <button type="button" aria-label="Notifications">
+                        <i data-lucide="bell" aria-hidden="true"></i>
+                      </button>
                     </header>
 
                     <main class="mobile-content">
@@ -182,7 +203,9 @@
 
                       <section class="mobile-list" aria-label="Plan details">
                         <article>
-                          <span class="dot teal"></span>
+                          <span class="list-icon teal" aria-hidden="true">
+                            <i data-lucide="chart-line"></i>
+                          </span>
                           <div>
                             <strong>Sell plan</strong>
                             <p>4 lots selected for staged sale</p>
@@ -190,7 +213,9 @@
                           <b>$32.4k</b>
                         </article>
                         <article>
-                          <span class="dot blue"></span>
+                          <span class="list-icon blue" aria-hidden="true">
+                            <i data-lucide="landmark"></i>
+                          </span>
                           <div>
                             <strong>Tax reserve</strong>
                             <p>Estimated withholding buffer</p>
@@ -198,7 +223,9 @@
                           <b>$7.8k</b>
                         </article>
                         <article>
-                          <span class="dot gold"></span>
+                          <span class="list-icon gold" aria-hidden="true">
+                            <i data-lucide="shield-check"></i>
+                          </span>
                           <div>
                             <strong>Keep shares</strong>
                             <p>Concentrated exposure after plan</p>
@@ -209,10 +236,22 @@
                     </main>
 
                     <nav class="mobile-tabs" aria-label="Mobile app tabs">
-                      <a class="active" href="#">Home</a>
-                      <a href="#">Portfolio</a>
-                      <a href="#">RSU</a>
-                      <a href="#">Profile</a>
+                      <a class="active" href="#">
+                        <i data-lucide="house" aria-hidden="true"></i>
+                        <span>Home</span>
+                      </a>
+                      <a href="#">
+                        <i data-lucide="briefcase-business" aria-hidden="true"></i>
+                        <span>Portfolio</span>
+                      </a>
+                      <a href="#">
+                        <i data-lucide="wallet" aria-hidden="true"></i>
+                        <span>RSU</span>
+                      </a>
+                      <a href="#">
+                        <i data-lucide="user-round" aria-hidden="true"></i>
+                        <span>Profile</span>
+                      </a>
                     </nav>
                   </div>
                 </div>
@@ -265,7 +304,8 @@
             </fieldset>
 
             <button id="approveBuildBtn" class="primary-action" type="button" disabled>
-              Approve APK build
+              <i data-lucide="package-check" aria-hidden="true"></i>
+              <span>Approve APK build</span>
             </button>
 
             <p id="buildResult" class="build-result">
@@ -276,6 +316,7 @@
       </main>
     </div>
 
+    <script src="./vendor/lucide.min.js"></script>
     <script type="module" src="./src/app.js"></script>
   </body>
 </html>

@@ -30,9 +30,13 @@ for (const phrase of [
   "Figma frame URLs",
   "Real mobile screen",
   "APK approval",
+  "vendor/lucide.min.js",
 ]) {
   if (!html.includes(phrase)) failures.push(`UI missing phrase: ${phrase}`);
 }
+
+const app = readFileSync(join(root, "apps/web/src/app.js"), "utf8");
+if (!app.includes("window.lucide")) failures.push("UI must initialize Lucide icons.");
 
 const parsed = parseFigmaUrls("https://figma.com/design/FgMA1234/Rovia-Mobile?node-id=104-22");
 if (!parsed.ok || parsed.urls[0].nodeId !== "104:22") {

@@ -50,6 +50,18 @@ const elements = {
   buildResult: document.querySelector("#buildResult"),
 };
 
+const sizeIcons = {
+  "compact-phone": "smartphone",
+  "large-phone": "smartphone",
+  tablet: "tablet",
+  "desktop-web": "monitor",
+};
+
+const evidenceIcons = {
+  Passed: "circle-check",
+  Waiting: "circle-dot",
+};
+
 function init() {
   elements.figmaUrls.value = "https://figma.com/design/FgMA1234/Rovia-Mobile?node-id=104-22";
   elements.prompt.value = "Implement the new RSU insights screen and keep the current mobile app structure.";
@@ -62,6 +74,7 @@ function init() {
   renderEvidence();
   updateBranchPreview();
   bindEvents();
+  renderIcons();
 }
 
 function bindEvents() {
@@ -103,7 +116,10 @@ function renderConnections() {
     button: elements.figmaConnectBtn,
     connected: state.figmaConnected,
     connectedText: "Connected",
+    idleText: "Connect Figma MCP",
+    idleIcon: "plug-zap",
     buttonText: "Figma MCP connected",
+    buttonIcon: "circle-check",
   });
 
   updateConnectorCard({
@@ -112,7 +128,10 @@ function renderConnections() {
     button: elements.gitConnectBtn,
     connected: state.gitConnected,
     connectedText: isRepoReady() ? "Repo ready" : "Connected",
+    idleText: "Connect Git repository",
+    idleIcon: "git-pull-request-create",
     buttonText: "Git repo connected",
+    buttonIcon: "circle-check",
   });
 
   const ready = isReadyForChanges();
@@ -126,25 +145,29 @@ function renderConnections() {
   elements.createJobBtn.disabled = !ready;
 
   if (!state.figmaConnected && !state.gitConnected) {
-    elements.gateMessage.textContent = "Connect Figma MCP and GitHub/Git MCP to unlock changes.";
+    setGateMessage("lock-keyhole", "Connect Figma MCP and GitHub/Git MCP to unlock changes.");
   } else if (!state.figmaConnected) {
-    elements.gateMessage.textContent = "Git repo is connected. Connect Figma MCP before starting a change.";
+    setGateMessage("lock-keyhole", "Git repo is connected. Connect Figma MCP before starting a change.");
   } else if (!state.gitConnected) {
-    elements.gateMessage.textContent = "Figma MCP is connected. Connect a Git repository before starting a change.";
+    setGateMessage("lock-keyhole", "Figma MCP is connected. Connect a Git repository before starting a change.");
   } else if (!state.selectedRepo.branches.includes("development")) {
-    elements.gateMessage.textContent = "This repo is connected, but it is blocked because the development branch is missing.";
+    setGateMessage("circle-alert", "This repo is connected, but it is blocked because the development branch is missing.");
   } else {
-    elements.gateMessage.textContent = "Everything is connected. You can start a Figma-driven change.";
+    setGateMessage("badge-check", "Everything is connected. You can start a Figma-driven change.");
   }
 
   renderRepoChecks();
+  renderIcons();
 }
 
-function updateConnectorCard({ card, status, button, connected, connectedText, buttonText }) {
+function updateConnectorCard({ card, status, button, connected, connectedText, idleText, idleIcon, buttonText, buttonIcon }) {
   card.classList.toggle("connected", connected);
-  status.textContent = connected ? connectedText : "Not connected";
+  status.innerHTML = `
+    ${icon(connected ? "circle-check" : "circle-alert")}
+    <span>${connected ? connectedText : "Not connected"}</span>
+  `;
   status.className = `status-chip ${connected ? "connected" : "disconnected"}`;
-  button.textContent = connected ? buttonText : button.textContent;
+  setButtonLabel(button, connected ? buttonIcon : idleIcon, connected ? buttonText : idleText);
   button.disabled = connected;
 }
 
@@ -186,7 +209,7 @@ function renderRepoChecks() {
     .map(
       (check) => `
         <div class="repo-check ${check.ok ? "ok" : "blocked"}">
-          <span aria-hidden="true"></span>
+          <span class="check-icon" aria-hidden="true">${icon(check.ok ? "circle-check" : "circle-alert")}</span>
           <div>
             <strong>${check.label}</strong>
             <p>${check.detail}</p>
@@ -209,9 +232,10 @@ function renderTimeline() {
     .map((step, index) => {
       const isDone = state.job && index < currentIndex;
       const isActive = state.job && index === currentIndex;
+      const stepIcon = isDone ? "check" : isActive ? "loader-circle" : "circle-dot";
       return `
         <li class="${isDone ? "done" : ""} ${isActive ? "active" : ""}">
-          <span>${index + 1}</span>
+          <span class="timeline-icon" aria-hidden="true">${icon(stepIcon)}</span>
           <div>
             <strong>${step.label}</strong>
             <p>${step.description}</p>
@@ -233,7 +257,8 @@ function renderSizeTabs() {
           aria-selected="${state.activeSize.id === size.id}"
           data-size-id="${size.id}"
         >
-          ${size.label}
+          ${icon(sizeIcons[size.id] ?? "smartphone")}
+          <span>${size.label}</span>
         </button>
       `,
     )
@@ -245,8 +270,10 @@ function renderSizeTabs() {
       elements.deviceFrame.className = `phone-frame ${state.activeSize.id}`;
       renderSizeTabs();
       updatePreviewMeta();
+      renderIcons();
     });
   });
+  renderIcons();
 }
 
 function renderEvidence() {
@@ -260,7 +287,10 @@ function renderEvidence() {
     .map(
       (item) => `
         <div class="evidence-item">
-          <span class="${item.status.toLowerCase()}">${item.status}</span>
+          <span class="${item.status.toLowerCase()}">
+            ${icon(evidenceIcons[item.status] ?? "circle-dot")}
+            <span>${item.status}</span>
+          </span>
           <div>
             <strong>${item.label}</strong>
             <p>${item.value}</p>
@@ -399,6 +429,7 @@ function renderAll() {
   renderEvidence();
   updatePreviewMeta();
   updateApproval();
+  renderIcons();
 }
 
 function renderEvents() {
@@ -412,9 +443,12 @@ function renderEvents() {
     .map(
       (event) => `
         <article>
-          <time>${event.time}</time>
-          <strong>${event.title}</strong>
-          <p>${event.body}</p>
+          <span class="event-icon" aria-hidden="true">${icon("workflow")}</span>
+          <div>
+            <time>${event.time}</time>
+            <strong>${event.title}</strong>
+            <p>${event.body}</p>
+          </div>
         </article>
       `,
     )
@@ -460,6 +494,27 @@ function randomSha() {
 
 function toTitle(value) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function icon(name) {
+  return `<i data-lucide="${name}" aria-hidden="true"></i>`;
+}
+
+function setButtonLabel(button, iconName, label) {
+  button.innerHTML = `${icon(iconName)}<span>${label}</span>`;
+}
+
+function setGateMessage(iconName, message) {
+  elements.gateMessage.innerHTML = `${icon(iconName)}<span>${message}</span>`;
+}
+
+function renderIcons() {
+  if (!window.lucide?.createIcons) return;
+  window.lucide.createIcons({
+    attrs: {
+      "stroke-width": 2,
+    },
+  });
 }
 
 init();
