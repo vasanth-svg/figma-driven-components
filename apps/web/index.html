@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Figma Release Control</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <aside class="sidebar" aria-label="Primary">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">FR</div>
+          <div>
+            <p class="eyebrow">Internal release</p>
+            <h1>Figma Release Control</h1>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Workflow">
+          <a class="active" href="#job-builder">Job Builder</a>
+          <a href="#preview">UI Preview</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#approval">APK Approval</a>
+        </nav>
+
+        <section class="policy-panel" aria-labelledby="policy-title">
+          <h2 id="policy-title">Workflow rules</h2>
+          <ul>
+            <li>PR base is always <code>development</code>.</li>
+            <li>Branch format is <code>figma/&lt;job&gt;-&lt;slug&gt;</code>.</li>
+            <li>No terminal or IDE exposed to users.</li>
+            <li>APK build waits for approval.</li>
+          </ul>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Feature One</p>
+            <h2>Figma to PR to evidence to APK</h2>
+          </div>
+          <div class="status-strip" aria-label="Connector status">
+            <span class="status-pill ready">GitHub MCP ready</span>
+            <span class="status-pill ready">Figma MCP ready</span>
+            <span class="status-pill idle">Maestro queued</span>
+            <span class="status-pill idle">EAS gated</span>
+          </div>
+        </header>
+
+        <section class="grid-layout">
+          <section id="job-builder" class="panel builder-panel" aria-labelledby="builder-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 1</p>
+                <h2 id="builder-title">Create a release job</h2>
+              </div>
+              <span id="jobIdBadge" class="soft-badge">No job yet</span>
+            </div>
+
+            <div class="field-group">
+              <label for="repoSelect">Repository</label>
+              <select id="repoSelect"></select>
+              <p id="repoMeta" class="helper-text"></p>
+            </div>
+
+            <div class="repo-checks" id="repoChecks" aria-live="polite"></div>
+
+            <div class="field-group">
+              <label for="figmaUrls">Figma URLs</label>
+              <textarea
+                id="figmaUrls"
+                rows="5"
+                spellcheck="false"
+                placeholder="https://figma.com/design/fileKey/FileName?node-id=1-2"
+              ></textarea>
+              <p class="helper-text">Paste one node-specific Figma URL per line. URLs must include <code>node-id</code>.</p>
+            </div>
+
+            <div class="field-group">
+              <label for="prompt">Implementation instructions</label>
+              <textarea
+                id="prompt"
+                rows="4"
+                placeholder="Implement the selected Figma designs in the chosen repo and keep the existing folder structure."
+              ></textarea>
+            </div>
+
+            <div class="branch-preview" aria-labelledby="branch-title">
+              <span id="branch-title">Generated branch</span>
+              <code id="branchName">figma/job-preview-design-update</code>
+            </div>
+
+            <div id="formError" class="form-error" role="alert"></div>
+
+            <button id="createJobBtn" class="primary-action" type="button">
+              Create Feature One job
+            </button>
+          </section>
+
+          <section class="panel progress-panel" aria-labelledby="progress-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 2</p>
+                <h2 id="progress-title">Progress without terminal noise</h2>
+              </div>
+              <span id="jobState" class="soft-badge">Ready</span>
+            </div>
+
+            <ol id="timeline" class="timeline"></ol>
+
+            <section class="event-feed" aria-labelledby="events-title">
+              <div class="section-heading compact">
+                <h3 id="events-title">Readable events</h3>
+                <button id="clearJobBtn" class="ghost-button" type="button">Reset</button>
+              </div>
+              <div id="events" class="events" aria-live="polite"></div>
+              <details class="raw-log">
+                <summary>Advanced raw log preview</summary>
+                <pre id="rawLog">No worker logs yet.</pre>
+              </details>
+            </section>
+          </section>
+        </section>
+
+        <section id="preview" class="panel preview-panel" aria-labelledby="preview-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h2 id="preview-title">Read-only UI preview</h2>
+            </div>
+            <div id="sizeTabs" class="segmented-control" role="tablist" aria-label="Display sizes"></div>
+          </div>
+
+          <div class="preview-grid">
+            <div class="device-preview">
+              <div id="deviceFrame" class="device-frame compact-phone">
+                <div class="mock-app-screen">
+                  <header>
+                    <span>Rovia</span>
+                    <strong>RSU Insight</strong>
+                  </header>
+                  <main>
+                    <section class="mock-hero">
+                      <p>Recommended action</p>
+                      <h3>Diversify 18% of vested shares</h3>
+                      <span>Projected risk drop: 24%</span>
+                    </section>
+                    <section class="mock-list">
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </section>
+                  </main>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-details">
+              <dl>
+                <div>
+                  <dt>Capture mode</dt>
+                  <dd id="captureMode">Checkpoint snapshot</dd>
+                </div>
+                <div>
+                  <dt>Route</dt>
+                  <dd id="routeName">/(tabs)/rsu-insight</dd>
+                </div>
+                <div>
+                  <dt>Commit</dt>
+                  <dd id="commitSha">pending</dd>
+                </div>
+                <div>
+                  <dt>Captured</dt>
+                  <dd id="capturedAt">Waiting for job</dd>
+                </div>
+              </dl>
+              <p class="helper-text">
+                The website shows controlled previews and evidence. Code edits remain worker-owned through branches and PRs.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid-layout bottom-grid">
+          <section id="evidence" class="panel evidence-panel" aria-labelledby="evidence-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 4</p>
+                <h2 id="evidence-title">Maestro evidence</h2>
+              </div>
+              <span id="evidenceState" class="soft-badge">Not started</span>
+            </div>
+            <div id="evidenceList" class="evidence-list"></div>
+          </section>
+
+          <section id="approval" class="panel approval-panel" aria-labelledby="approval-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 5</p>
+                <h2 id="approval-title">APK approval gate</h2>
+              </div>
+              <span id="buildState" class="soft-badge">Blocked</span>
+            </div>
+
+            <fieldset class="profile-choice">
+              <legend>Build profile</legend>
+              <label>
+                <input type="radio" name="profile" value="stage" checked />
+                Stage APK
+                <span>Maps to EAS preview</span>
+              </label>
+              <label>
+                <input type="radio" name="profile" value="prod" />
+                Prod APK
+                <span>Maps to EAS production</span>
+              </label>
+            </fieldset>
+
+            <button id="approveBuildBtn" class="primary-action" type="button" disabled>
+              Approve APK build
+            </button>
+
+            <div id="buildResult" class="build-result">
+              Checks and Maestro evidence must pass before approval.
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
