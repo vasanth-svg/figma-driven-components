@@ -19,7 +19,7 @@
           </div>
         </div>
         <p class="hero-copy">
-          Connect Figma MCP and GitHub/Git MCP first. Once both are connected, the dashboard unlocks the change form, creates a safe branch, shows a real mobile preview, and gates APK builds behind approval.
+          Connect Figma MCP and GitHub/Git MCP first. Once both are connected, the dashboard unlocks the change form, creates a safe branch, auto-runs the Expo Snack preview from the repo, and gates APK builds behind approval.
         </p>
       </header>
 
@@ -148,130 +148,52 @@
           </section>
         </section>
 
-        <aside class="preview-column" aria-label="Mobile preview and release">
+        <aside class="preview-column" aria-label="Expo Snack preview and release">
           <section class="panel preview-panel" aria-labelledby="preview-title">
             <div class="section-title">
               <div>
                 <p class="eyebrow">Live preview</p>
-                <h2 id="preview-title">Real mobile screen</h2>
+                <h2 id="preview-title">Expo Snack live preview</h2>
               </div>
               <span id="previewState" class="quiet-badge">Waiting</span>
             </div>
 
-            <div id="sizeTabs" class="size-tabs" role="tablist" aria-label="Preview size"></div>
+            <div id="snackPlatformTabs" class="platform-tabs" role="tablist" aria-label="Expo Snack platform"></div>
 
-            <div class="phone-stage">
-              <div id="deviceFrame" class="phone-frame compact-phone">
-                <div class="phone-bezel">
-                  <div class="phone-status">
-                    <span>9:41</span>
-                    <div class="phone-sensors" aria-hidden="true">
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </div>
-                  </div>
-
-                  <div class="mobile-screen">
-                    <header class="mobile-header">
-                      <button type="button" aria-label="Back">
-                        <i data-lucide="arrow-left" aria-hidden="true"></i>
-                      </button>
-                      <div>
-                        <span>Rovia</span>
-                        <strong>RSU Insights</strong>
-                      </div>
-                      <button type="button" aria-label="Notifications">
-                        <i data-lucide="bell" aria-hidden="true"></i>
-                      </button>
-                    </header>
-
-                    <main class="mobile-content">
-                      <section class="balance-card">
-                        <p>Total RSU value</p>
-                        <strong>$184,620</strong>
-                        <span>+12.4% from last quarter</span>
-                      </section>
-
-                      <section class="recommend-card">
-                        <div>
-                          <p>Recommended action</p>
-                          <h3>Diversify 18% of vested shares</h3>
-                        </div>
-                        <span class="risk-pill">Risk down 24%</span>
-                      </section>
-
-                      <section class="mobile-list" aria-label="Plan details">
-                        <article>
-                          <span class="list-icon teal" aria-hidden="true">
-                            <i data-lucide="chart-line"></i>
-                          </span>
-                          <div>
-                            <strong>Sell plan</strong>
-                            <p>4 lots selected for staged sale</p>
-                          </div>
-                          <b>$32.4k</b>
-                        </article>
-                        <article>
-                          <span class="list-icon blue" aria-hidden="true">
-                            <i data-lucide="landmark"></i>
-                          </span>
-                          <div>
-                            <strong>Tax reserve</strong>
-                            <p>Estimated withholding buffer</p>
-                          </div>
-                          <b>$7.8k</b>
-                        </article>
-                        <article>
-                          <span class="list-icon gold" aria-hidden="true">
-                            <i data-lucide="shield-check"></i>
-                          </span>
-                          <div>
-                            <strong>Keep shares</strong>
-                            <p>Concentrated exposure after plan</p>
-                          </div>
-                          <b>64%</b>
-                        </article>
-                      </section>
-                    </main>
-
-                    <nav class="mobile-tabs" aria-label="Mobile app tabs">
-                      <a class="active" href="#">
-                        <i data-lucide="house" aria-hidden="true"></i>
-                        <span>Home</span>
-                      </a>
-                      <a href="#">
-                        <i data-lucide="briefcase-business" aria-hidden="true"></i>
-                        <span>Portfolio</span>
-                      </a>
-                      <a href="#">
-                        <i data-lucide="wallet" aria-hidden="true"></i>
-                        <span>RSU</span>
-                      </a>
-                      <a href="#">
-                        <i data-lucide="user-round" aria-hidden="true"></i>
-                        <span>Profile</span>
-                      </a>
-                    </nav>
-                  </div>
-                </div>
+            <div class="snack-stage">
+              <div id="snackLoading" class="snack-loading">
+                <i data-lucide="loader-circle" aria-hidden="true"></i>
+                <strong>Auto-run from repo</strong>
+                <span>Connect Figma MCP and GitHub/Git MCP to start the live Snack preview.</span>
               </div>
+              <iframe
+                id="snackFrame"
+                class="snack-frame"
+                title="Expo Snack live app preview"
+                loading="eager"
+                allow="accelerometer; camera; encrypted-media; gyroscope; microphone"
+              ></iframe>
             </div>
 
-            <dl class="preview-meta">
+            <dl class="snack-meta">
               <div>
-                <dt>Route</dt>
-                <dd id="routeName">/(tabs)/rsu-insight</dd>
+                <dt>Repository</dt>
+                <dd id="snackRepoName">rovia/frontend-mobile</dd>
               </div>
               <div>
-                <dt>Commit</dt>
-                <dd id="commitSha">pending</dd>
+                <dt>Branch</dt>
+                <dd id="snackBranch">development</dd>
               </div>
               <div>
-                <dt>Captured</dt>
-                <dd id="capturedAt">Waiting for job</dd>
+                <dt>Source</dt>
+                <dd><a id="snackSourceLink" href="#" target="_blank" rel="noreferrer">Waiting for repo</a></dd>
               </div>
             </dl>
+
+            <a id="openSnackLink" class="snack-open-link" href="https://snack.expo.dev" target="_blank" rel="noreferrer">
+              <i data-lucide="external-link" aria-hidden="true"></i>
+              <span>Open in Expo Snack</span>
+            </a>
           </section>
 
           <section class="panel release-panel" aria-labelledby="release-title">

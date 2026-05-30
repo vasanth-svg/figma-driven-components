@@ -1,16 +1,16 @@
 import {
   buildBranchName,
-  displaySizes,
   jobSteps,
   parseFigmaUrls,
   repositories,
+  snackPlatforms,
 } from "./contracts.js";
 
 const state = {
   figmaConnected: false,
   gitConnected: false,
   selectedRepo: repositories[0],
-  activeSize: displaySizes[0],
+  activeSnackPlatform: snackPlatforms[0],
   job: null,
   timers: [],
 };
@@ -38,23 +38,18 @@ const elements = {
   timeline: document.querySelector("#timeline"),
   events: document.querySelector("#events"),
   rawLog: document.querySelector("#rawLog"),
-  sizeTabs: document.querySelector("#sizeTabs"),
-  deviceFrame: document.querySelector("#deviceFrame"),
+  snackPlatformTabs: document.querySelector("#snackPlatformTabs"),
+  snackLoading: document.querySelector("#snackLoading"),
+  snackFrame: document.querySelector("#snackFrame"),
   previewState: document.querySelector("#previewState"),
-  routeName: document.querySelector("#routeName"),
-  commitSha: document.querySelector("#commitSha"),
-  capturedAt: document.querySelector("#capturedAt"),
+  snackRepoName: document.querySelector("#snackRepoName"),
+  snackBranch: document.querySelector("#snackBranch"),
+  snackSourceLink: document.querySelector("#snackSourceLink"),
+  openSnackLink: document.querySelector("#openSnackLink"),
   evidenceList: document.querySelector("#evidenceList"),
   buildState: document.querySelector("#buildState"),
   approveBuildBtn: document.querySelector("#approveBuildBtn"),
   buildResult: document.querySelector("#buildResult"),
-};
-
-const sizeIcons = {
-  "compact-phone": "smartphone",
-  "large-phone": "smartphone",
-  tablet: "tablet",
-  "desktop-web": "monitor",
 };
 
 const evidenceIcons = {
@@ -70,8 +65,9 @@ function init() {
   renderConnections();
   renderRepoChecks();
   renderTimeline();
-  renderSizeTabs();
+  renderSnackPlatformTabs();
   renderEvidence();
+  updateSnackPreview();
   updateBranchPreview();
   bindEvents();
   renderIcons();
@@ -92,6 +88,7 @@ function bindEvents() {
     state.selectedRepo = repositories.find((repo) => repo.id === elements.repoSelect.value);
     renderConnections();
     renderRepoChecks();
+    updateSnackPreview();
     updateBranchPreview();
   });
 
@@ -157,6 +154,7 @@ function renderConnections() {
   }
 
   renderRepoChecks();
+  updateSnackPreview();
   renderIcons();
 }
 
@@ -246,30 +244,29 @@ function renderTimeline() {
     .join("");
 }
 
-function renderSizeTabs() {
-  elements.sizeTabs.innerHTML = displaySizes
+function renderSnackPlatformTabs() {
+  elements.snackPlatformTabs.innerHTML = snackPlatforms
     .map(
-      (size) => `
+      (platform) => `
         <button
-          class="${state.activeSize.id === size.id ? "active" : ""}"
+          class="${state.activeSnackPlatform.id === platform.id ? "active" : ""}"
           type="button"
           role="tab"
-          aria-selected="${state.activeSize.id === size.id}"
-          data-size-id="${size.id}"
+          aria-selected="${state.activeSnackPlatform.id === platform.id}"
+          data-platform-id="${platform.id}"
         >
-          ${icon(sizeIcons[size.id] ?? "smartphone")}
-          <span>${size.label}</span>
+          ${icon(platform.icon)}
+          <span>${platform.label}</span>
         </button>
       `,
     )
     .join("");
 
-  elements.sizeTabs.querySelectorAll("button").forEach((button) => {
+  elements.snackPlatformTabs.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", () => {
-      state.activeSize = displaySizes.find((size) => size.id === button.dataset.sizeId);
-      elements.deviceFrame.className = `phone-frame ${state.activeSize.id}`;
-      renderSizeTabs();
-      updatePreviewMeta();
+      state.activeSnackPlatform = snackPlatforms.find((platform) => platform.id === button.dataset.platformId);
+      renderSnackPlatformTabs();
+      updateSnackPreview({ forceReload: true });
       renderIcons();
     });
   });
@@ -348,7 +345,7 @@ function runJobSimulation() {
   const sequence = [
     ["validating_repo", "Repository verified", "GitHub/Git MCP confirmed access and development branch."],
     ["fetching_figma", "Figma design fetched", "Figma MCP prepared design context, screenshot, and metadata fallback."],
-    ["implementing", "Mobile UI checkpoint", "The preview now reflects the intended mobile screen structure."],
+    ["implementing", "Expo Snack synced", "Snack is auto-running from the generated repo branch."],
     ["creating_pr", "Draft PR prepared", `Target branch is development from ${state.job.branchName}.`],
     ["testing_flow", "Evidence captured", "Maestro screenshots and video are attached to the job."],
     ["awaiting_review", "Ready for review", "APK build remains blocked until you approve stage or prod."],
@@ -427,7 +424,7 @@ function renderAll() {
   renderTimeline();
   renderEvents();
   renderEvidence();
-  updatePreviewMeta();
+  updateSnackPreview();
   updateApproval();
   renderIcons();
 }
@@ -456,11 +453,35 @@ function renderEvents() {
   elements.rawLog.textContent = state.job.rawLogs.join("\n");
 }
 
-function updatePreviewMeta() {
-  elements.deviceFrame.className = `phone-frame ${state.activeSize.id}`;
-  elements.previewState.textContent = state.job ? toTitle(state.job.status) : "Waiting";
-  elements.commitSha.textContent = state.job?.commitSha ?? "pending";
-  elements.capturedAt.textContent = state.job ? new Date().toLocaleString() : "Waiting for job";
+function updateSnackPreview({ forceReload = false } = {}) {
+  const ready = isReadyForChanges();
+  const branch = getSnackBranch();
+  const sourceUrl = buildSnackSourceUrl(branch);
+  const snackUrl = buildSnackUrl(sourceUrl, true);
+  const editorUrl = buildSnackUrl(sourceUrl, false);
+
+  elements.snackRepoName.textContent = state.selectedRepo.fullName;
+  elements.snackBranch.textContent = branch;
+  elements.snackSourceLink.href = sourceUrl;
+  elements.snackSourceLink.textContent = state.selectedRepo.snack.entryFile;
+  elements.openSnackLink.href = editorUrl;
+  elements.snackLoading.classList.toggle("is-hidden", ready);
+  elements.snackFrame.classList.toggle("is-visible", ready);
+
+  if (!ready) {
+    elements.previewState.textContent = state.gitConnected ? "Blocked" : "Waiting";
+    if (elements.snackFrame.src !== "about:blank") {
+      elements.snackFrame.src = "about:blank";
+      elements.snackFrame.dataset.snackUrl = "";
+    }
+    return;
+  }
+
+  elements.previewState.textContent = state.job ? "Auto-running" : "Repo live";
+  if (forceReload || elements.snackFrame.dataset.snackUrl !== snackUrl) {
+    elements.snackFrame.src = snackUrl;
+    elements.snackFrame.dataset.snackUrl = snackUrl;
+  }
 }
 
 function updateApproval() {
@@ -486,6 +507,47 @@ function updateApproval() {
     elements.buildState.textContent = "Blocked";
     elements.buildResult.textContent = "Waiting for validation and Maestro evidence.";
   }
+}
+
+function getSnackBranch() {
+  if (state.job?.branchName) return state.job.branchName;
+  if (state.selectedRepo.branches.includes("development")) return "development";
+  return state.selectedRepo.defaultBranch;
+}
+
+function buildSnackSourceUrl(branch) {
+  const entryFile = state.selectedRepo.snack.entryFile
+    .split("/")
+    .filter(Boolean)
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+  return `https://raw.githubusercontent.com/${state.selectedRepo.fullName}/${branch}/${entryFile}`;
+}
+
+function buildSnackUrl(sourceUrl, embedded) {
+  const params = new URLSearchParams({
+    platform: state.activeSnackPlatform.id,
+    preview: "true",
+    theme: "light",
+    supportedPlatforms: snackPlatforms.map((platform) => platform.id).join(","),
+    sourceUrl,
+    name: `${state.selectedRepo.fullName} live preview`,
+    description: `Auto-run from ${state.selectedRepo.fullName}@${getSnackBranch()}`,
+  });
+
+  if (embedded) {
+    params.set("device-frame", "true");
+  }
+
+  if (state.selectedRepo.snack.sdkVersion) {
+    params.set("sdkVersion", state.selectedRepo.snack.sdkVersion);
+  }
+
+  if (state.selectedRepo.snack.dependencies) {
+    params.set("dependencies", state.selectedRepo.snack.dependencies);
+  }
+
+  return `https://snack.expo.dev/${embedded ? "embedded" : ""}?${params.toString()}`;
 }
 
 function randomSha() {

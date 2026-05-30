@@ -37,14 +37,14 @@
 - [ ] Add agent execution wrapper.
 - [ ] Add validation command runner.
 - [ ] Add preview capture checkpoints during implementation.
-- [ ] Add native emulator screenshot capture for mobile preview.
-- [ ] Add browser viewport capture for web-capable repos.
+- [ ] Add Expo Snack preview entry generation from the selected repo branch.
+- [ ] Add fallback capture from Maestro screenshots when Snack cannot run the repo.
 - [ ] Add PR creation/update logic.
 
-## Phase 4: Live Preview And Display Sizes
+## Phase 4: Expo Snack Live Preview
 
-- [ ] Define supported preview sizes: compact phone, large phone, tablet, and desktop/web.
-- [ ] Store preview artifacts with route/screen, size, commit SHA, and capture time.
+- [ ] Define supported Snack platforms: Android, iOS, web, and device QR.
+- [ ] Store preview metadata with repo, branch, source URL, commit SHA, and refresh time.
 - [ ] Refresh website previews after meaningful worker checkpoints.
 - [ ] Add fallback from live preview to latest Maestro screenshot when preview startup fails.
 - [ ] Ensure users can review UI without opening a terminal, IDE, emulator, or simulator.
@@ -77,7 +77,7 @@
 - [ ] Unit test job state transitions.
 - [ ] Integration test PR creation to `development`.
 - [ ] Integration test approval rejection before Maestro pass.
-- [ ] Integration test preview artifact generation across configured display sizes.
+- [ ] Integration test Snack preview URL generation from selected repo and generated branch.
 - [ ] End-to-end test sample Figma-to-PR-to-APK job.
 
 ## Done Criteria

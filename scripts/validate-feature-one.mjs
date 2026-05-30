@@ -28,7 +28,8 @@ for (const phrase of [
   "Connect Figma MCP",
   "Connect Git repository",
   "Figma frame URLs",
-  "Real mobile screen",
+  "Expo Snack live preview",
+  "Auto-run from repo",
   "APK approval",
   "vendor/lucide.min.js",
 ]) {
@@ -37,6 +38,8 @@ for (const phrase of [
 
 const app = readFileSync(join(root, "apps/web/src/app.js"), "utf8");
 if (!app.includes("window.lucide")) failures.push("UI must initialize Lucide icons.");
+if (!app.includes("https://snack.expo.dev/")) failures.push("UI must build Expo Snack preview URLs.");
+if (!app.includes("sourceUrl")) failures.push("Snack preview must run from a repo source URL.");
 
 const parsed = parseFigmaUrls("https://figma.com/design/FgMA1234/Rovia-Mobile?node-id=104-22");
 if (!parsed.ok || parsed.urls[0].nodeId !== "104:22") {

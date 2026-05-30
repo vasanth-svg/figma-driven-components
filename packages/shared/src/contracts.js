@@ -7,6 +7,12 @@ export const repositories = [
     branches: ["main", "development", "staging"],
     githubAccess: true,
     hasAgentInstructions: true,
+    snack: {
+      entryFile: ".dashboard/snack/App.tsx",
+      sdkVersion: "",
+      dependencies: "expo-router,react-native-safe-area-context,react-native-screens",
+      note: "Worker exports a Snack-compatible entry from the mobile repo after implementation.",
+    },
   },
   {
     id: "rovia-invest-web",
@@ -16,6 +22,12 @@ export const repositories = [
     branches: ["main", "development"],
     githubAccess: true,
     hasAgentInstructions: false,
+    snack: {
+      entryFile: "App.tsx",
+      sdkVersion: "",
+      dependencies: "expo",
+      note: "Repo can use a lightweight Snack entry for preview.",
+    },
   },
   {
     id: "partner-mobile",
@@ -25,6 +37,12 @@ export const repositories = [
     branches: ["main", "release"],
     githubAccess: true,
     hasAgentInstructions: false,
+    snack: {
+      entryFile: ".dashboard/snack/App.tsx",
+      sdkVersion: "",
+      dependencies: "expo",
+      note: "Blocked until the required development branch exists.",
+    },
   },
 ];
 
@@ -81,11 +99,11 @@ export const jobSteps = [
   },
 ];
 
-export const displaySizes = [
-  { id: "compact-phone", label: "Compact phone", width: 375, height: 812 },
-  { id: "large-phone", label: "Large phone", width: 430, height: 932 },
-  { id: "tablet", label: "Tablet", width: 768, height: 1024 },
-  { id: "desktop-web", label: "Desktop/web", width: 1440, height: 900 },
+export const snackPlatforms = [
+  { id: "android", label: "Android", icon: "smartphone" },
+  { id: "ios", label: "iOS", icon: "smartphone" },
+  { id: "web", label: "Web", icon: "monitor" },
+  { id: "mydevice", label: "My device", icon: "qr-code" },
 ];
 
 export function parseFigmaUrls(rawValue) {

@@ -16,7 +16,7 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 8. Dashboard shows live implementation progress and UI previews without exposing terminal or IDE access.
 9. Agent implements changes, validates them, and creates a draft PR to `development`.
 10. Agent runs Maestro, captures screenshots and video, and posts evidence.
-11. User reviews the PR, live preview snapshots, responsive display-size previews, and evidence in the dashboard.
+11. User reviews the PR, Expo Snack live preview, and Maestro evidence in the dashboard.
 12. User chooses `stage` or `prod` and explicitly approves APK generation.
 13. Worker builds an APK and publishes the artifact link in the dashboard and PR.
 
@@ -37,7 +37,7 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 - Save screenshots and a video recording as job artifacts.
 - Build Android APK only after user approval.
 - Hide terminal and IDE details from product/developer users; expose readable progress, diffs, preview screenshots, logs, and approvals in the website.
-- Show UI previews in the website while changes are being made, including multiple display sizes such as compact phone, large phone, tablet, and web/responsive viewport when supported by the target repo.
+- Show UI previews in the website while changes are being made by auto-running an Expo Snack preview from a repo-generated Snack entry file.
 
 ## Out Of Scope For V1
 
@@ -55,6 +55,6 @@ An internal Figma-to-APK release dashboard for mobile teams. The dashboard coord
 - Every implementation job leaves a reviewable PR against `development`.
 - Every completed job has screenshots, video, and a test verdict.
 - Users can inspect the changed UI inside the website without opening a local IDE, terminal, emulator, or simulator.
-- Responsive previews show the changed UI at the configured display sizes before APK approval.
+- Expo Snack preview shows the changed UI before APK approval, with fallback to Maestro screenshots when Snack cannot run the repo.
 - APK builds cannot start until the user approves a profile.
 - Stage/prod APK choices map predictably to EAS profiles.

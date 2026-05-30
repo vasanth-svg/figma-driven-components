@@ -65,7 +65,7 @@ Required behavior:
 - Show PR link and current branch.
 - Show implementation summary.
 - Show validation command results.
-- Show responsive preview snapshots across configured display sizes.
+- Show the Expo Snack live preview from the generated repo branch or preview artifact.
 - Show Maestro test status.
 - Show screenshots and video recording.
 - Disable build approval if Maestro failed or required checks failed.
