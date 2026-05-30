@@ -3,7 +3,7 @@
 ## Delivery Order
 
 - [ ] Plan 1 first: Figma input, repo selection, branch/PR to `development`, Maestro evidence, approval, and APK build.
-- [ ] Plan 2 second: terminal-free website control room, live UI previews, and display-size previews.
+- [ ] Plan 2 second: terminal-free website control room and Expo Snack live previews.
 
 ## Phase 1: Repository And Docs
 
@@ -14,6 +14,7 @@
 
 ## Phase 2: Dashboard UI
 
+- [ ] Use Bootstrap component styles for standard controls such as buttons, selects, textareas, badges, segmented controls, and radio choices.
 - [ ] Build authentication shell.
 - [ ] Build repo selector.
 - [ ] Verify `development` exists before allowing job creation.

@@ -31,13 +31,17 @@ for (const phrase of [
   "Expo Snack live preview",
   "Auto-run from repo",
   "APK approval",
-  "vendor/lucide.min.js",
+  "vendor/bootstrap/css/bootstrap.min.css",
+  "form-select",
+  "form-control",
+  "btn-check",
 ]) {
   if (!html.includes(phrase)) failures.push(`UI missing phrase: ${phrase}`);
 }
 
 const app = readFileSync(join(root, "apps/web/src/app.js"), "utf8");
-if (!app.includes("window.lucide")) failures.push("UI must initialize Lucide icons.");
+if (!app.includes("createIcons")) failures.push("UI must initialize Lucide icons.");
+if (!html.includes("vendor/bootstrap")) failures.push("UI must use the Bootstrap component library.");
 if (!app.includes("https://snack.expo.dev/")) failures.push("UI must build Expo Snack preview URLs.");
 if (!app.includes("sourceUrl")) failures.push("Snack preview must run from a repo source URL.");
 

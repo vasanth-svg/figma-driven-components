@@ -132,8 +132,7 @@ function renderConnections() {
   });
 
   const ready = isReadyForChanges();
-  elements.gateBadge.textContent = ready ? "Ready" : "Locked";
-  elements.gateBadge.className = `gate-badge ${ready ? "ready" : "locked"}`;
+  setBadge(elements.gateBadge, ready ? "success" : "secondary", ready ? "Ready" : "Locked");
   elements.changePanel.classList.toggle("is-disabled", !ready);
 
   elements.repoSelect.disabled = !state.gitConnected;
@@ -160,11 +159,7 @@ function renderConnections() {
 
 function updateConnectorCard({ card, status, button, connected, connectedText, idleText, idleIcon, buttonText, buttonIcon }) {
   card.classList.toggle("connected", connected);
-  status.innerHTML = `
-    ${icon(connected ? "circle-check" : "circle-alert")}
-    <span>${connected ? connectedText : "Not connected"}</span>
-  `;
-  status.className = `status-chip ${connected ? "connected" : "disconnected"}`;
+  setBadge(status, connected ? "success" : "secondary", connected ? connectedText : "Not connected", connected ? "circle-check" : "circle-alert");
   setButtonLabel(button, connected ? buttonIcon : idleIcon, connected ? buttonText : idleText);
   button.disabled = connected;
 }
@@ -249,10 +244,8 @@ function renderSnackPlatformTabs() {
     .map(
       (platform) => `
         <button
-          class="${state.activeSnackPlatform.id === platform.id ? "active" : ""}"
+          class="btn ${state.activeSnackPlatform.id === platform.id ? "platform-active" : "platform-idle"}"
           type="button"
-          role="tab"
-          aria-selected="${state.activeSnackPlatform.id === platform.id}"
           data-platform-id="${platform.id}"
         >
           ${icon(platform.icon)}
@@ -284,7 +277,7 @@ function renderEvidence() {
     .map(
       (item) => `
         <div class="evidence-item">
-          <span class="${item.status.toLowerCase()}">
+          <span class="badge rounded-pill text-bg-${item.status === "Passed" ? "success" : "secondary"}">
             ${icon(evidenceIcons[item.status] ?? "circle-dot")}
             <span>${item.status}</span>
           </span>
@@ -333,7 +326,7 @@ function createJob() {
     approved: false,
   };
 
-  elements.jobIdBadge.textContent = id;
+  setBadge(elements.jobIdBadge, "primary", id);
   elements.branchName.textContent = state.job.branchName;
   addEvent("Change request created", `Branch ${state.job.branchName} will open a PR to development.`);
   addRawLog(`queued ${id} ${state.job.branchName}`);
@@ -396,7 +389,7 @@ function resetJob() {
   clearTimers();
   state.job = null;
   elements.formError.textContent = "";
-  elements.jobIdBadge.textContent = "No job yet";
+  setBadge(elements.jobIdBadge, "secondary", "No job yet");
   elements.buildResult.textContent = "Build approval unlocks after validation and Maestro evidence pass.";
   updateBranchPreview();
   renderAll();
@@ -469,7 +462,7 @@ function updateSnackPreview({ forceReload = false } = {}) {
   elements.snackFrame.classList.toggle("is-visible", ready);
 
   if (!ready) {
-    elements.previewState.textContent = state.gitConnected ? "Blocked" : "Waiting";
+    setBadge(elements.previewState, "secondary", state.gitConnected ? "Blocked" : "Waiting");
     if (elements.snackFrame.src !== "about:blank") {
       elements.snackFrame.src = "about:blank";
       elements.snackFrame.dataset.snackUrl = "";
@@ -477,7 +470,7 @@ function updateSnackPreview({ forceReload = false } = {}) {
     return;
   }
 
-  elements.previewState.textContent = state.job ? "Auto-running" : "Repo live";
+  setBadge(elements.previewState, "success", state.job ? "Auto-running" : "Repo live");
   if (forceReload || elements.snackFrame.dataset.snackUrl !== snackUrl) {
     elements.snackFrame.src = snackUrl;
     elements.snackFrame.dataset.snackUrl = snackUrl;
@@ -489,22 +482,22 @@ function updateApproval() {
   elements.approveBuildBtn.disabled = !canApprove;
 
   if (!state.job) {
-    elements.buildState.textContent = "Blocked";
+    setBadge(elements.buildState, "secondary", "Blocked");
     elements.buildResult.textContent = "Build approval unlocks after validation and Maestro evidence pass.";
     return;
   }
 
   if (state.job.status === "awaiting_review") {
-    elements.buildState.textContent = "Ready";
+    setBadge(elements.buildState, "success", "Ready");
     elements.buildResult.textContent = "Evidence passed. Choose stage or prod, then approve APK generation.";
   } else if (state.job.status === "building") {
-    elements.buildState.textContent = "Building";
+    setBadge(elements.buildState, "warning", "Building");
     elements.buildResult.textContent = "APK build is running from the approved branch and commit.";
   } else if (state.job.status === "complete") {
-    elements.buildState.textContent = "APK ready";
+    setBadge(elements.buildState, "success", "APK ready");
     elements.buildResult.innerHTML = `<strong>APK ready:</strong> <code>${state.job.apkUrl}</code>`;
   } else {
-    elements.buildState.textContent = "Blocked";
+    setBadge(elements.buildState, "secondary", "Blocked");
     elements.buildResult.textContent = "Waiting for validation and Maestro evidence.";
   }
 }
@@ -564,6 +557,11 @@ function icon(name) {
 
 function setButtonLabel(button, iconName, label) {
   button.innerHTML = `${icon(iconName)}<span>${label}</span>`;
+}
+
+function setBadge(badge, variant, label, iconName) {
+  badge.className = `badge rounded-pill text-bg-${variant}`;
+  badge.innerHTML = iconName ? `${icon(iconName)}<span>${label}</span>` : label;
 }
 
 function setGateMessage(iconName, message) {

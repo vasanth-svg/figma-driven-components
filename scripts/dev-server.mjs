@@ -10,19 +10,28 @@ const preferredPort = Number(process.env.PORT || 4173);
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
 };
 
 function createAppServer() {
   return createServer((request, response) => {
     const url = new URL(request.url || "/", `http://${request.headers.host}`);
     const safePath = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, "");
-    let filePath =
-      safePath === "/vendor/lucide.min.js"
-        ? join(projectRoot, "node_modules/lucide/dist/umd/lucide.min.js")
-        : join(root, safePath);
+    let filePath;
+
+    if (safePath === "/vendor/lucide.min.js") {
+      filePath = join(projectRoot, "node_modules/lucide/dist/umd/lucide.min.js");
+    } else if (safePath.startsWith("/vendor/lucide/")) {
+      filePath = join(projectRoot, "node_modules/lucide/dist/esm", safePath.slice("/vendor/lucide/".length));
+    } else if (safePath.startsWith("/vendor/bootstrap/")) {
+      filePath = join(projectRoot, "node_modules/bootstrap/dist", safePath.slice("/vendor/bootstrap/".length));
+    } else {
+      filePath = join(root, safePath);
+    }
 
     if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
       filePath = join(root, "index.html");

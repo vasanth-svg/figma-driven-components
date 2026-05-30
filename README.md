@@ -7,10 +7,12 @@ Feature One is a runnable dashboard scaffold for the core workflow:
 3. Submit one or more Figma node URLs.
 4. Create a valid `figma/<job-id>-<slug>` branch plan.
 5. Track readable job progress without exposing terminal or IDE access.
-6. Review responsive UI previews and Maestro evidence placeholders.
+6. Review an Expo Snack live preview and Maestro evidence placeholders.
 7. Approve a stage/prod Android APK build only after checks pass.
 
 This first version uses local mock adapters so the product can be reviewed immediately. The next pass should replace the mock adapters with GitHub MCP, Figma MCP, Maestro, and EAS worker integrations.
+
+UI controls should use Bootstrap component styles for standard elements such as buttons, selects, textareas, badges, segmented controls, and radio choices. Avoid hand-building common controls unless the component library cannot cover the interaction.
 
 ## Run
 

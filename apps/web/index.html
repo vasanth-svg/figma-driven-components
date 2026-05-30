@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Figma Driven Components</title>
+    <link rel="stylesheet" href="./vendor/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
@@ -31,7 +32,7 @@
                 <p class="eyebrow">Start here</p>
                 <h2 id="connect-title">Connect your tools</h2>
               </div>
-              <span id="gateBadge" class="gate-badge locked">Locked</span>
+              <span id="gateBadge" class="badge rounded-pill text-bg-secondary">Locked</span>
             </div>
 
             <div class="connector-grid">
@@ -40,11 +41,11 @@
                   <div class="connector-icon figma-icon" aria-hidden="true">
                     <i data-lucide="palette"></i>
                   </div>
-                  <span id="figmaStatus" class="status-chip disconnected">Not connected</span>
+                  <span id="figmaStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
                 </div>
                 <h3 id="figma-title">Figma MCP</h3>
                 <p>Required for design context, node screenshots, metadata fallback, and asset references.</p>
-                <button id="figmaConnectBtn" class="secondary-action" type="button">
+                <button id="figmaConnectBtn" class="btn secondary-action" type="button">
                   <i data-lucide="plug-zap" aria-hidden="true"></i>
                   <span>Connect Figma MCP</span>
                 </button>
@@ -55,11 +56,11 @@
                   <div class="connector-icon git-icon" aria-hidden="true">
                     <i data-lucide="folder-git-2"></i>
                   </div>
-                  <span id="gitStatus" class="status-chip disconnected">Not connected</span>
+                  <span id="gitStatus" class="badge rounded-pill text-bg-secondary">Not connected</span>
                 </div>
                 <h3 id="git-title">GitHub / Git MCP</h3>
                 <p>Required for repo access, branch validation, PR creation, and status comments.</p>
-                <button id="gitConnectBtn" class="secondary-action" type="button">
+                <button id="gitConnectBtn" class="btn secondary-action" type="button">
                   <i data-lucide="git-pull-request-create" aria-hidden="true"></i>
                   <span>Connect Git repository</span>
                 </button>
@@ -78,21 +79,22 @@
                 <p class="eyebrow">Change request</p>
                 <h2 id="change-title">Tell the agent what to build</h2>
               </div>
-              <span id="jobIdBadge" class="quiet-badge">No job yet</span>
+              <span id="jobIdBadge" class="badge rounded-pill text-bg-secondary">No job yet</span>
             </div>
 
             <div class="field-row">
-              <label for="repoSelect">Repository</label>
-              <select id="repoSelect" disabled></select>
+              <label class="form-label" for="repoSelect">Repository</label>
+              <select id="repoSelect" class="form-select" disabled></select>
               <p id="repoMeta" class="hint">Connect GitHub/Git MCP to choose a repository.</p>
             </div>
 
             <div id="repoChecks" class="repo-checks" aria-live="polite"></div>
 
             <div class="field-row">
-              <label for="figmaUrls">Figma frame URLs</label>
+              <label class="form-label" for="figmaUrls">Figma frame URLs</label>
               <textarea
                 id="figmaUrls"
+                class="form-control"
                 rows="4"
                 disabled
                 spellcheck="false"
@@ -101,9 +103,10 @@
             </div>
 
             <div class="field-row">
-              <label for="prompt">What should change?</label>
+              <label class="form-label" for="prompt">What should change?</label>
               <textarea
                 id="prompt"
+                class="form-control"
                 rows="3"
                 disabled
                 placeholder="Example: Implement the new RSU insight summary screen and keep the current mobile folder structure."
@@ -117,7 +120,7 @@
 
             <div id="formError" class="form-error" role="alert"></div>
 
-            <button id="createJobBtn" class="primary-action" type="button" disabled>
+            <button id="createJobBtn" class="btn primary-action" type="button" disabled>
               <i data-lucide="play" aria-hidden="true"></i>
               <span>Start change request</span>
             </button>
@@ -129,7 +132,7 @@
                 <p class="eyebrow">Progress</p>
                 <h2 id="progress-title">Plain-English status</h2>
               </div>
-              <button id="clearJobBtn" class="text-action" type="button">
+              <button id="clearJobBtn" class="btn text-action" type="button">
                 <i data-lucide="refresh-cw" aria-hidden="true"></i>
                 <span>Reset</span>
               </button>
@@ -155,10 +158,10 @@
                 <p class="eyebrow">Live preview</p>
                 <h2 id="preview-title">Expo Snack live preview</h2>
               </div>
-              <span id="previewState" class="quiet-badge">Waiting</span>
+              <span id="previewState" class="badge rounded-pill text-bg-secondary">Waiting</span>
             </div>
 
-            <div id="snackPlatformTabs" class="platform-tabs" role="tablist" aria-label="Expo Snack platform"></div>
+            <div id="snackPlatformTabs" class="platform-tabs" role="group" aria-label="Expo Snack platform"></div>
 
             <div class="snack-stage">
               <div id="snackLoading" class="snack-loading">
@@ -202,30 +205,26 @@
                 <p class="eyebrow">Release</p>
                 <h2 id="release-title">APK approval</h2>
               </div>
-              <span id="buildState" class="quiet-badge">Blocked</span>
+              <span id="buildState" class="badge rounded-pill text-bg-secondary">Blocked</span>
             </div>
 
             <div id="evidenceList" class="evidence-list"></div>
 
-            <fieldset class="profile-choice">
+            <fieldset class="profile-choice" aria-label="Choose build target">
               <legend>Choose build target</legend>
-              <label>
-                <input type="radio" name="profile" value="stage" checked />
-                <span>
-                  Stage APK
-                  <small>EAS preview profile</small>
-                </span>
+              <input class="btn-check" type="radio" name="profile" id="profileStage" value="stage" autocomplete="off" checked />
+              <label class="btn btn-outline-secondary" for="profileStage">
+                <span>Stage APK</span>
+                <small>EAS preview profile</small>
               </label>
-              <label>
-                <input type="radio" name="profile" value="prod" />
-                <span>
-                  Prod APK
-                  <small>EAS production profile</small>
-                </span>
+              <input class="btn-check" type="radio" name="profile" id="profileProd" value="prod" autocomplete="off" />
+              <label class="btn btn-outline-secondary" for="profileProd">
+                <span>Prod APK</span>
+                <small>EAS production profile</small>
               </label>
             </fieldset>
 
-            <button id="approveBuildBtn" class="primary-action" type="button" disabled>
+            <button id="approveBuildBtn" class="btn primary-action" type="button" disabled>
               <i data-lucide="package-check" aria-hidden="true"></i>
               <span>Approve APK build</span>
             </button>

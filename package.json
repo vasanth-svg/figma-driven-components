@@ -16,6 +16,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "lucide": "^1.17.0"
   }
 }
